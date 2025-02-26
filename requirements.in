@@ -1,0 +1,2 @@
+transformers[torch]==4.49.0
+plotly==6.0.0
