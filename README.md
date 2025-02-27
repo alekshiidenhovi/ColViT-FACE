@@ -1,1 +1,1 @@
-# ColBERT-FACE: Late Interaction for Face Identification
+# ColViT-FACE: Late Interaction for Face Identification
