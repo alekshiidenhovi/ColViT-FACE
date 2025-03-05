@@ -1,4 +1,5 @@
 einops==0.8.1
+fancy_einsum
 timm==1.0.15
 transformers[torch]==4.49.0
 plotly==6.0.0

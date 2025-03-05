@@ -8,6 +8,8 @@ charset-normalizer==3.4.1
     # via requests
 einops==0.8.1
     # via -r requirements.in
+fancy-einsum==0.0.3
+    # via -r requirements.in
 filelock==3.17.0
     # via
     #   huggingface-hub
