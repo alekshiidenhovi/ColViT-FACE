@@ -47,6 +47,8 @@ idna==3.10
     #   requests
 jinja2==3.1.5
     # via torch
+kagglehub==0.3.10
+    # via -r requirements.in
 lightning-sdk==0.2.3
     # via -r requirements.in
 markdown-it-py==3.0.0
@@ -104,6 +106,7 @@ packaging==24.2
     # via
     #   accelerate
     #   huggingface-hub
+    #   kagglehub
     #   lightning-sdk
     #   plotly
     #   transformers
@@ -125,6 +128,7 @@ pyyaml==6.0.2
     # via
     #   accelerate
     #   huggingface-hub
+    #   kagglehub
     #   timm
     #   transformers
 regex==2024.11.6
@@ -133,6 +137,7 @@ requests==2.32.3
     # via
     #   docker
     #   huggingface-hub
+    #   kagglehub
     #   lightning-sdk
     #   transformers
 rich==13.9.4
@@ -167,6 +172,7 @@ torchvision==0.21.0
 tqdm==4.67.1
     # via
     #   huggingface-hub
+    #   kagglehub
     #   lightning-sdk
     #   transformers
 transformers==4.49.0
