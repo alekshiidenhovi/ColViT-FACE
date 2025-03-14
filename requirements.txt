@@ -2,14 +2,28 @@
 #    uv pip compile requirements.in --output-file requirements.txt
 accelerate==1.4.0
     # via transformers
+annotated-types==0.7.0
+    # via pydantic
+anyio==4.8.0
+    # via starlette
+backoff==2.2.1
+    # via lightning-sdk
 certifi==2025.1.31
     # via requests
 charset-normalizer==3.4.1
     # via requests
+click==8.1.8
+    # via
+    #   lightning-sdk
+    #   uvicorn
+docker==7.1.0
+    # via lightning-sdk
 einops==0.8.1
     # via -r requirements.in
 fancy-einsum==0.0.3
     # via -r requirements.in
+fastapi==0.115.11
+    # via lightning-sdk
 filelock==3.17.0
     # via
     #   huggingface-hub
@@ -19,6 +33,8 @@ fsspec==2025.2.0
     # via
     #   huggingface-hub
     #   torch
+h11==0.14.0
+    # via uvicorn
 huggingface-hub==0.29.1
     # via
     #   accelerate
@@ -26,11 +42,19 @@ huggingface-hub==0.29.1
     #   tokenizers
     #   transformers
 idna==3.10
-    # via requests
+    # via
+    #   anyio
+    #   requests
 jinja2==3.1.5
     # via torch
+lightning-sdk==0.2.3
+    # via -r requirements.in
+markdown-it-py==3.0.0
+    # via rich
 markupsafe==3.0.2
     # via jinja2
+mdurl==0.1.2
+    # via markdown-it-py
 mpmath==1.3.0
     # via sympy
 narwhals==1.28.0
@@ -80,6 +104,7 @@ packaging==24.2
     # via
     #   accelerate
     #   huggingface-hub
+    #   lightning-sdk
     #   plotly
     #   transformers
 pillow==11.1.0
@@ -88,6 +113,14 @@ plotly==6.0.0
     # via -r requirements.in
 psutil==7.0.0
     # via accelerate
+pydantic==2.10.6
+    # via fastapi
+pydantic-core==2.27.2
+    # via pydantic
+pygments==2.19.1
+    # via rich
+pyjwt==2.10.1
+    # via lightning-sdk
 pyyaml==6.0.2
     # via
     #   accelerate
@@ -98,13 +131,25 @@ regex==2024.11.6
     # via transformers
 requests==2.32.3
     # via
+    #   docker
     #   huggingface-hub
+    #   lightning-sdk
     #   transformers
+rich==13.9.4
+    # via lightning-sdk
 safetensors==0.5.3
     # via
     #   accelerate
     #   timm
     #   transformers
+simple-term-menu==1.6.6
+    # via lightning-sdk
+six==1.17.0
+    # via lightning-sdk
+sniffio==1.3.1
+    # via anyio
+starlette==0.46.1
+    # via fastapi
 sympy==1.13.1
     # via torch
 timm==1.0.15
@@ -122,6 +167,7 @@ torchvision==0.21.0
 tqdm==4.67.1
     # via
     #   huggingface-hub
+    #   lightning-sdk
     #   transformers
 transformers==4.49.0
     # via -r requirements.in
@@ -129,7 +175,20 @@ triton==3.2.0
     # via torch
 typing-extensions==4.12.2
     # via
+    #   anyio
+    #   fastapi
     #   huggingface-hub
+    #   pydantic
+    #   pydantic-core
     #   torch
 urllib3==2.3.0
-    # via requests
+    # via
+    #   docker
+    #   lightning-sdk
+    #   requests
+uvicorn==0.34.0
+    # via lightning-sdk
+websocket-client==1.8.0
+    # via lightning-sdk
+wget==3.2
+    # via lightning-sdk
