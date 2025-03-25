@@ -47,6 +47,8 @@ idna==3.10
     # via
     #   anyio
     #   requests
+iniconfig==2.1.0
+    # via pytest
 jinja2==3.1.5
     # via torch
 kagglehub==0.3.10
@@ -113,11 +115,14 @@ packaging==24.2
     #   kagglehub
     #   lightning-sdk
     #   plotly
+    #   pytest
     #   transformers
 pillow==11.1.0
     # via torchvision
 plotly==6.0.0
     # via -r requirements.in
+pluggy==1.5.0
+    # via pytest
 psutil==7.0.0
     # via accelerate
 pydantic==2.10.6
@@ -128,6 +133,8 @@ pygments==2.19.1
     # via rich
 pyjwt==2.10.1
     # via lightning-sdk
+pytest==8.3.5
+    # via -r requirements.in
 pyyaml==6.0.2
     # via
     #   accelerate
