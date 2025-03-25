@@ -20,6 +20,8 @@ docker==7.1.0
     # via lightning-sdk
 einops==0.8.1
     # via -r requirements.in
+faiss-cpu==1.10.0
+    # via -r requirements.in
 fancy-einsum==0.0.3
     # via -r requirements.in
 fastapi==0.115.11
@@ -66,6 +68,7 @@ networkx==3.4.2
 numpy==2.2.3
     # via
     #   accelerate
+    #   faiss-cpu
     #   torchvision
     #   transformers
 nvidia-cublas-cu12==12.4.5.8
@@ -105,6 +108,7 @@ nvidia-nvtx-cu12==12.4.127
 packaging==24.2
     # via
     #   accelerate
+    #   faiss-cpu
     #   huggingface-hub
     #   kagglehub
     #   lightning-sdk
