@@ -4,7 +4,6 @@ faiss-cpu==1.10.0
 kagglehub==0.3.10
 lightning==2.5.1
 lightning_sdk==0.2.3
-mxnet==1.9.1
 timm==1.0.15
 transformers[torch]==4.49.0
 plotly==6.0.0
