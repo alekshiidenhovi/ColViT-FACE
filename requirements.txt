@@ -49,6 +49,8 @@ fsspec==2025.2.0
     #   lightning
     #   pytorch-lightning
     #   torch
+graphviz==0.8.4
+    # via mxnet
 h11==0.14.0
     # via uvicorn
 huggingface-hub==0.29.1
@@ -89,14 +91,17 @@ multidict==6.2.0
     # via
     #   aiohttp
     #   yarl
+mxnet==1.9.1
+    # via -r requirements.in
 narwhals==1.28.0
     # via plotly
 networkx==3.4.2
     # via torch
-numpy==2.2.3
+numpy==1.26.4
     # via
     #   accelerate
     #   faiss-cpu
+    #   mxnet
     #   torchmetrics
     #   torchvision
     #   transformers
@@ -189,6 +194,7 @@ requests==2.32.3
     #   huggingface-hub
     #   kagglehub
     #   lightning-sdk
+    #   mxnet
     #   transformers
 rich==13.9.4
     # via lightning-sdk
