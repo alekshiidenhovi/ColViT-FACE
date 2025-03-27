@@ -1,7 +1,7 @@
 import timm
 import torch.nn as nn
 import torch
-from fancy_einsum import einsum
+from einops import einsum
 
 
 class VitEncoder(nn.Module):
@@ -22,9 +22,9 @@ class VitEncoder(nn.Module):
         tokens = self.model.forward_features(x)
         tokens = (
             einsum(
-                "batch_size seq_len hidden_dim, hidden_dim reduced_dim -> batch_size seq_len reduced_dim",
                 tokens,
                 self.weights,
+                "batch_size seq_len hidden_dim, hidden_dim reduced_dim -> batch_size seq_len reduced_dim",
             )
             + self.bias
         )
