@@ -221,7 +221,9 @@ ptyprocess==0.7.0
 pure-eval==0.2.3
     # via stack-data
 pydantic==2.10.6
-    # via fastapi
+    # via
+    #   -r requirements.in
+    #   fastapi
 pydantic-core==2.27.2
     # via pydantic
 pygments==2.19.1
