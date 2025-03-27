@@ -9,7 +9,7 @@ class TrainingConfig(BaseModel):
         default="vit_small_patch16_384.augreg_in21k_ft_in1k",
         description="Name of the pretrained vision transformer to use",
     )
-    dim: int = Field(
+    token_embedding_dim: int = Field(
         default=128, ge=1, description="Final dimension of the token embeddings"
     )
     learning_rate: float = Field(
@@ -23,4 +23,9 @@ class TrainingConfig(BaseModel):
     )
     enable_checkpointing: bool = Field(
         default=True, description="Enables checkpointing of the latest training epoch"
+    )
+    val_check_interval: int = Field(
+        default=100,
+        ge=10,
+        description="The interval of training batched to run validation",
     )
