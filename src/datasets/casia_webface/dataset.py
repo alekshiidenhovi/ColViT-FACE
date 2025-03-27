@@ -68,21 +68,39 @@ class CASIAFaceDataset(Dataset):
             negative_images is a list of randomly sampled images from other identities,
             and identity is the identity label of the anchor image
         """
-        img_path = self.image_paths[idx]
+        query_image_path = self.image_paths[idx]
         identity = self.image_identities[idx]
         other_identities = [
             id for id in self.identity_to_image_paths.keys() if id != identity
         ]
 
-        negative_paths = []
+        positive_image_path = random.choice(
+            [
+                img_path
+                for img_path in self.identity_to_image_paths[identity]
+                if img_path != query_image_path
+            ]
+        )
+
+        negative_image_paths = []
         for _ in range(self.num_negative_samples):
             neg_identity = random.choice(other_identities)
             neg_path = random.choice(self.identity_to_image_paths[neg_identity])
-            negative_paths.append(neg_path)
+            negative_image_paths.append(neg_path)
 
-        image = self.transform(Image.open(img_path).convert("RGB"))
+        query_image = [self.transform(Image.open(query_image_path).convert("RGB"))]
+        positive_image = [
+            self.transform(Image.open(positive_image_path).convert("RGB"))
+        ]
         negative_imgs = [
-            self.transform(Image.open(p).convert("RGB")) for p in negative_paths
+            self.transform(Image.open(p).convert("RGB")) for p in negative_image_paths
         ]
 
-        return image, negative_imgs, identity
+        return (
+            query_image,
+            positive_image,
+            negative_imgs,
+            query_image_path,
+            positive_image_path,
+            negative_image_paths,
+        )
