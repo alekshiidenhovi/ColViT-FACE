@@ -15,7 +15,8 @@ class VitEncoder(nn.Module):
         hidden_dim: int | None = getattr(self.model, "embed_dim", None)
         if hidden_dim is None:
             raise ValueError("Cannot find embed_dim attribute on model.")
-        self.weights = nn.Parameter(torch.randn(hidden_dim, reduced_dim))
+        std_dev = 1 / torch.sqrt(torch.tensor(reduced_dim).float())
+        self.weights = nn.Parameter(torch.randn(hidden_dim, reduced_dim) * std_dev)
         self.bias = nn.Parameter(torch.zeros(reduced_dim))
 
     def forward(self, x):
