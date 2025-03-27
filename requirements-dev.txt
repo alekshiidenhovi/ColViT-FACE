@@ -44,8 +44,6 @@ executing==2.2.0
     # via stack-data
 faiss-cpu==1.10.0
     # via -r requirements.in
-fancy-einsum==0.0.3
-    # via -r requirements.in
 fastapi==0.115.12
     # via lightning-sdk
 filelock==3.18.0

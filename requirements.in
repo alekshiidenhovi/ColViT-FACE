@@ -1,5 +1,4 @@
 einops==0.8.1
-fancy_einsum
 faiss-cpu==1.10.0
 kagglehub==0.3.10
 lightning==2.5.1
