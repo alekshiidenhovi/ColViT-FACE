@@ -1,9 +1,8 @@
 import torch
-from torch import Tensor
 import pytorch_lightning as pl
 from src.models.vit_encoder import VitEncoder
 from src.config import TrainingConfig
-from src.training.scoring import maxsim
+from src.models.utils import compute_metrics
 
 
 class ColViT(pl.LightningModule):
@@ -13,70 +12,28 @@ class ColViT(pl.LightningModule):
         )
         self.config = config
 
-    def forward(self, tokens: Tensor) -> Tensor:
+    def forward(self, tokens: torch.Tensor) -> torch.Tensor:
         return self.encoder(tokens)
 
-    def training_step(self, batch, batch_idx):
-        query_image, positive_image, negative_images, _, _, _ = batch
-
-        query_repr = self.encoder(
-            query_image
-        )  # [batch, 1, seq_len, token_embedding_dim]
-        all_gallery = torch.cat(
-            [positive_image, negative_images], dim=1
-        )  # [batch, 1+num_neg, H, W]
-        gallery_repr = self.encoder(
-            all_gallery
-        )  # [batch, 1+num_neg, seq_len, token_embedding_dim]
-
-        scores = maxsim(query_repr, gallery_repr)  # [batch, 1+num_neg]
-
-        targets = torch.zeros_like(scores)
-        targets[:, 0] = 1
-
-        loss = torch.nn.functional.cross_entropy(scores, targets)
+    def training_step(self, batch: torch.Tensor, batch_idx):
+        loss, recall_at_1, recall_at_3 = compute_metrics(batch, self.encoder)
+        self.log("train_loss", loss)
+        self.log("train_recall_at_1", recall_at_1)
+        self.log("train_recall_at_3", recall_at_3)
         return loss
 
-    def validation_step(self, batch, batch_idx):
-        query_image, positive_image, negative_images, _, _, _ = batch
-
-        query_repr = self.encoder(
-            query_image
-        )  # [batch, 1, seq_len, token_embedding_dim]
-        all_gallery = torch.cat(
-            [positive_image, negative_images], dim=1
-        )  # [batch, 1+num_neg, H, W]
-        gallery_repr = self.encoder(
-            all_gallery
-        )  # [batch, 1+num_neg, seq_len, token_embedding_dim]
-
-        scores = maxsim(query_repr, gallery_repr)  # [batch, 1+num_neg]
-
-        targets = torch.zeros_like(scores)
-        targets[:, 0] = 1
-
-        loss = torch.nn.functional.cross_entropy(scores, targets)
+    def validation_step(self, batch: torch.Tensor, batch_idx):
+        loss, recall_at_1, recall_at_3 = compute_metrics(batch, self.encoder)
+        self.log("val_loss", loss)
+        self.log("val_recall_at_1", recall_at_1)
+        self.log("val_recall_at_3", recall_at_3)
         return loss
 
-    def testing_step(self, batch, batch_idx):
-        query_image, positive_image, negative_images, _, _, _ = batch
-
-        query_repr = self.encoder(
-            query_image
-        )  # [batch, 1, seq_len, token_embedding_dim]
-        all_gallery = torch.cat(
-            [positive_image, negative_images], dim=1
-        )  # [batch, 1+num_neg, H, W]
-        gallery_repr = self.encoder(
-            all_gallery
-        )  # [batch, 1+num_neg, seq_len, token_embedding_dim]
-
-        scores = maxsim(query_repr, gallery_repr)  # [batch, 1+num_neg]
-
-        targets = torch.zeros_like(scores)
-        targets[:, 0] = 1
-
-        loss = torch.nn.functional.cross_entropy(scores, targets)
+    def testing_step(self, batch: torch.Tensor, batch_idx):
+        loss, recall_at_1, recall_at_3 = compute_metrics(batch, self.encoder)
+        self.log("test_loss", loss)
+        self.log("test_recall_at_1", recall_at_1)
+        self.log("test_recall_at_3", recall_at_3)
         return loss
 
     def configure_optimizers(self):
