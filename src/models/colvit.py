@@ -11,6 +11,7 @@ class ColViT(pl.LightningModule):
         self.encoder = VitEncoder(
             config.token_embedding_dim, config.pretrained_vit_name
         )
+        self.config = config
 
     def forward(self, tokens: Tensor) -> Tensor:
         return self.encoder(tokens)
@@ -18,11 +19,13 @@ class ColViT(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         query_image, positive_image, negative_images, _, _, _ = batch
 
-        query_repr = self(query_image)  # [batch, 1, seq_len, token_embedding_dim]
+        query_repr = self.encoder(
+            query_image
+        )  # [batch, 1, seq_len, token_embedding_dim]
         all_gallery = torch.cat(
             [positive_image, negative_images], dim=1
         )  # [batch, 1+num_neg, H, W]
-        gallery_repr = self(
+        gallery_repr = self.encoder(
             all_gallery
         )  # [batch, 1+num_neg, seq_len, token_embedding_dim]
 
@@ -37,11 +40,13 @@ class ColViT(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         query_image, positive_image, negative_images, _, _, _ = batch
 
-        query_repr = self(query_image)  # [batch, 1, seq_len, token_embedding_dim]
+        query_repr = self.encoder(
+            query_image
+        )  # [batch, 1, seq_len, token_embedding_dim]
         all_gallery = torch.cat(
             [positive_image, negative_images], dim=1
         )  # [batch, 1+num_neg, H, W]
-        gallery_repr = self(
+        gallery_repr = self.encoder(
             all_gallery
         )  # [batch, 1+num_neg, seq_len, token_embedding_dim]
 
@@ -56,11 +61,13 @@ class ColViT(pl.LightningModule):
     def testing_step(self, batch, batch_idx):
         query_image, positive_image, negative_images, _, _, _ = batch
 
-        query_repr = self(query_image)  # [batch, 1, seq_len, token_embedding_dim]
+        query_repr = self.encoder(
+            query_image
+        )  # [batch, 1, seq_len, token_embedding_dim]
         all_gallery = torch.cat(
             [positive_image, negative_images], dim=1
         )  # [batch, 1+num_neg, H, W]
-        gallery_repr = self(
+        gallery_repr = self.encoder(
             all_gallery
         )  # [batch, 1+num_neg, seq_len, token_embedding_dim]
 
@@ -71,3 +78,7 @@ class ColViT(pl.LightningModule):
 
         loss = torch.nn.functional.cross_entropy(scores, targets)
         return loss
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.config.learning_rate)
+        return optimizer
