@@ -1,5 +1,6 @@
 import torch
 from src.training.scoring import maxsim
+from src.metrics import recall_at_k
 
 
 def compute_metrics(batch: torch.Tensor, encoder: torch.nn.Module):
@@ -19,8 +20,7 @@ def compute_metrics(batch: torch.Tensor, encoder: torch.nn.Module):
     targets[:, 0] = 1
     loss = torch.nn.functional.cross_entropy(scores, targets)
 
-    _, top_indices = torch.topk(scores, k=min(3, scores.shape[1]), dim=1)
-    recall_at_1 = (top_indices[:, 0] == 0).float().mean()
-    recall_at_3 = torch.any(top_indices == 0, dim=1).float().mean()
+    recall_at_1 = recall_at_k(scores, 1)
+    recall_at_3 = recall_at_k(scores, 3)
 
     return loss, recall_at_1, recall_at_3
