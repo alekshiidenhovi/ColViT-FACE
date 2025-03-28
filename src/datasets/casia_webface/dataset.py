@@ -1,11 +1,13 @@
 import os
 import typing as T
 import random
+import torch
 from collections import defaultdict
 from PIL import Image
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from src.logger import logger
+from src.types import TRAINING_SAMPLE
 
 
 class CASIAFaceDataset(Dataset):
@@ -13,7 +15,7 @@ class CASIAFaceDataset(Dataset):
         self,
         dir_path: str,
         identities: T.List[str],
-        transform,
+        transform: transforms.Compose,
         num_negative_samples: int = 5,
     ):
         """Initialize the FaceTripletDataset.
@@ -31,10 +33,10 @@ class CASIAFaceDataset(Dataset):
 
         """
         self.dir_path = dir_path
-        self.transform = transform if transform else transforms.ToTensor()
-        self.identity_to_image_paths = defaultdict(list)
-        self.image_paths = []
-        self.image_identities = []
+        self.transform = transform
+        self.identity_to_image_paths: T.Dict[str, T.List[str]] = defaultdict(list)
+        self.image_paths: T.List[str] = []
+        self.image_identities: T.List[str] = []
         self.num_negative_samples = num_negative_samples
 
         for identity in identities:
@@ -52,7 +54,7 @@ class CASIAFaceDataset(Dataset):
     def __len__(self):
         return len(self.image_paths)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> TRAINING_SAMPLE:
         """Get an image with its negative samples.
 
         Parameters
@@ -88,17 +90,20 @@ class CASIAFaceDataset(Dataset):
             neg_path = random.choice(self.identity_to_image_paths[neg_identity])
             negative_image_paths.append(neg_path)
 
-        query_image = [self.transform(Image.open(query_image_path).convert("RGB"))]
-        positive_image = [
-            self.transform(Image.open(positive_image_path).convert("RGB"))
-        ]
+        query_image: torch.Tensor = self.transform(
+            Image.open(query_image_path).convert("RGB")
+        )
+        positive_image: torch.Tensor = self.transform(
+            Image.open(positive_image_path).convert("RGB")
+        )
         negative_imgs = [
             self.transform(Image.open(p).convert("RGB")) for p in negative_image_paths
         ]
+        negative_imgs = torch.stack(negative_imgs)
 
         return (
-            query_image,
-            positive_image,
+            query_image.unsqueeze(0),
+            positive_image.unsqueeze(0),
             negative_imgs,
             query_image_path,
             positive_image_path,
