@@ -29,3 +29,7 @@ class TrainingConfig(BaseModel):
         ge=10,
         description="The interval of training batched to run validation",
     )
+    seed: int = Field(
+        default=42,
+        description="Seed for training reproducibility",
+    )
