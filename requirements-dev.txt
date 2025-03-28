@@ -19,13 +19,16 @@ attrs==25.3.0
 backoff==2.2.1
     # via lightning-sdk
 certifi==2025.1.31
-    # via requests
+    # via
+    #   requests
+    #   sentry-sdk
 charset-normalizer==3.4.1
     # via requests
 click==8.1.8
     # via
     #   lightning-sdk
     #   uvicorn
+    #   wandb
 comm==0.2.2
     # via ipykernel
 contourpy==1.3.1
@@ -38,6 +41,8 @@ decorator==5.2.1
     # via ipython
 docker==7.1.0
     # via lightning-sdk
+docker-pycreds==0.4.0
+    # via wandb
 einops==0.8.1
     # via -r requirements.in
 executing==2.2.0
@@ -63,6 +68,10 @@ fsspec==2025.3.0
     #   lightning
     #   pytorch-lightning
     #   torch
+gitdb==4.0.12
+    # via gitpython
+gitpython==3.1.44
+    # via wandb
 h11==0.14.0
     # via uvicorn
 huggingface-hub==0.29.3
@@ -199,7 +208,9 @@ pillow==11.1.0
     #   matplotlib
     #   torchvision
 platformdirs==4.3.7
-    # via jupyter-core
+    # via
+    #   jupyter-core
+    #   wandb
 plotly==6.0.0
     # via -r requirements.in
 pluggy==1.5.0
@@ -210,10 +221,13 @@ propcache==0.3.1
     # via
     #   aiohttp
     #   yarl
+protobuf==5.29.4
+    # via wandb
 psutil==7.0.0
     # via
     #   accelerate
     #   ipykernel
+    #   wandb
 ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
@@ -222,6 +236,7 @@ pydantic==2.10.6
     # via
     #   -r requirements.in
     #   fastapi
+    #   wandb
 pydantic-core==2.27.2
     # via pydantic
 pygments==2.19.1
@@ -250,6 +265,7 @@ pyyaml==6.0.2
     #   pytorch-lightning
     #   timm
     #   transformers
+    #   wandb
 pyzmq==26.3.0
     # via
     #   ipykernel
@@ -263,6 +279,7 @@ requests==2.32.3
     #   kagglehub
     #   lightning-sdk
     #   transformers
+    #   wandb
 rich==13.9.4
     # via lightning-sdk
 ruff==0.11.2
@@ -272,14 +289,23 @@ safetensors==0.5.3
     #   accelerate
     #   timm
     #   transformers
+sentry-sdk==2.24.1
+    # via wandb
+setproctitle==1.3.5
+    # via wandb
 setuptools==78.1.0
-    # via lightning-utilities
+    # via
+    #   lightning-utilities
+    #   wandb
 simple-term-menu==1.6.6
     # via lightning-sdk
 six==1.17.0
     # via
+    #   docker-pycreds
     #   lightning-sdk
     #   python-dateutil
+smmap==5.0.2
+    # via gitdb
 sniffio==1.3.1
     # via anyio
 stack-data==0.6.3
@@ -343,13 +369,17 @@ typing-extensions==4.13.0
     #   pydantic-core
     #   pytorch-lightning
     #   torch
+    #   wandb
 urllib3==2.3.0
     # via
     #   docker
     #   lightning-sdk
     #   requests
+    #   sentry-sdk
 uvicorn==0.34.0
     # via lightning-sdk
+wandb==0.19.8
+    # via -r requirements.in
 wcwidth==0.2.13
     # via prompt-toolkit
 websocket-client==1.8.0

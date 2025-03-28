@@ -9,3 +9,4 @@ timm==1.0.15
 transformers[torch]==4.49.0
 plotly==6.0.0
 pytest==8.3.5
+wandb==0.19.8
