@@ -21,7 +21,7 @@ class TrainingConfig(BaseModel):
         description="Size of the input images",
     )
     train_val_test_split: T.Tuple[float, float, float] = Field(
-        default=(0.8, 0.1, 0.1),
+        default=(0.95, 0.01, 0.04),
         description="Train, validation, and test split proportions",
     )
     num_negative_samples: int = Field(
@@ -55,6 +55,15 @@ class TrainingConfig(BaseModel):
     seed: int = Field(
         default=42,
         description="Seed for training reproducibility",
+    )
+    learning_rate: float = Field(
+        default=1e-5, ge=0, description="Learning rate of the model"
+    )
+    lora_rank: int = Field(
+        default=8, description="Rank of the LoRA decomposition matrix", ge=2
+    )
+    lora_alpha: int = Field(
+        default=8, description="Scaling factor for the LoRA decomposition matrix", ge=1
     )
 
     @field_validator("train_val_test_split")
