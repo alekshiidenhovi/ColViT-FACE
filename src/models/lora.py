@@ -30,9 +30,10 @@ class LoRALayer(torch.nn.Module):
         self.A = torch.nn.Parameter(torch.randn(in_dim, rank) * std_dev)
         self.B = torch.nn.Parameter(torch.zeros(rank, out_dim))
         self.alpha = alpha
+        self.rank = rank
 
     def forward(self, x):
-        x = self.alpha * (x @ self.A @ self.B)
+        x = (self.alpha / self.rank) * (x @ self.A @ self.B)
         return x
 
 
