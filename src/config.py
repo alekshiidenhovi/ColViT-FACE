@@ -1,10 +1,33 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import typing as T
 
 BASE_MODEL = T.Literal["vit_small_patch16_384.augreg_in21k_ft_in1k"]
 
 
 class TrainingConfig(BaseModel):
+    dataset_dir: str = Field(
+        description="Path to the dataset directory",
+    )
+    batch_size: int = Field(
+        default=32,
+        ge=4,
+        description="Batch size for training",
+    )
+    num_workers: int = Field(
+        default=4, description="Number of workers for data loading", ge=1
+    )
+    img_size: int = Field(
+        default=256,
+        description="Size of the input images",
+    )
+    train_val_test_split: T.Tuple[float, float, float] = Field(
+        default=(0.8, 0.1, 0.1),
+        description="Train, validation, and test split proportions",
+    )
+    num_negative_samples: int = Field(
+        default=7,
+        description="Number of negative samples to return per anchor image",
+    )
     pretrained_vit_name: BASE_MODEL = Field(
         default="vit_small_patch16_384.augreg_in21k_ft_in1k",
         description="Name of the pretrained vision transformer to use",
@@ -33,3 +56,11 @@ class TrainingConfig(BaseModel):
         default=42,
         description="Seed for training reproducibility",
     )
+
+    @field_validator("train_val_test_split")
+    def validate_split_sum(cls, v):
+        if sum(v) != 1:
+            raise ValueError(
+                "Train, validation and test split proportions must sum to 1"
+            )
+        return v

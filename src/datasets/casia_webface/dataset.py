@@ -16,7 +16,7 @@ class CASIAFaceDataset(Dataset):
         dir_path: str,
         identities: T.List[str],
         transform: transforms.Compose,
-        num_negative_samples: int = 5,
+        num_negative_samples: int,
     ):
         """Initialize the FaceTripletDataset.
 
