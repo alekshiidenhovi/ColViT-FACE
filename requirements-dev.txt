@@ -255,6 +255,8 @@ python-dateutil==2.9.0.post0
     # via
     #   jupyter-client
     #   matplotlib
+python-dotenv==1.1.0
+    # via -r requirements.in
 pytorch-lightning==2.5.1
     # via lightning
 pyyaml==6.0.2

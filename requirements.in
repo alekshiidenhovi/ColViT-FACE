@@ -6,8 +6,9 @@ lightning==2.5.1
 lightning_sdk==0.2.3
 matplotlib==3.10.1
 pydantic==2.10.6
+python-dotenv==1.1.0
 timm==1.0.15
 transformers[torch]==4.49.0
 plotly==6.0.0
 pytest==8.3.5
-wandb==0.19.8s
+wandb==0.19.8
