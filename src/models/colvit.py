@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
 from models.vit_encoder import VitEncoder
-from models.utils import compute_metrics
+from models.utils import compute_similarity_scores
 from models.lora import LinearWithLoRA
 from common.config import TrainingConfig
 from common.metrics import recall_at_k
@@ -44,7 +44,7 @@ class ColViT(pl.LightningModule):
         return self.encoder(tokens)
 
     def training_step(self, batch: torch.Tensor, batch_idx):
-        scores = compute_metrics(batch, self.encoder)
+        scores = compute_similarity_scores(batch, self.encoder)
         targets = torch.zeros_like(scores)
         targets[:, 0] = 1
         loss = F.cross_entropy(scores, targets)
@@ -56,27 +56,33 @@ class ColViT(pl.LightningModule):
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx):
-        scores = compute_metrics(batch, self.encoder)
+        scores = compute_similarity_scores(batch, self.encoder)
         targets = torch.zeros_like(scores)
         targets[:, 0] = 1
         loss = F.cross_entropy(scores, targets)
         recall_at_1 = recall_at_k(scores, 1)
         recall_at_3 = recall_at_k(scores, 3)
+        recall_at_10 = recall_at_k(scores, 10)
         self.log("val_loss", loss)
         self.log("val_recall_at_1", recall_at_1)
         self.log("val_recall_at_3", recall_at_3)
+        self.log("val_recall_at_10", recall_at_10)
         return loss
 
     def testing_step(self, batch: torch.Tensor, batch_idx):
-        scores = compute_metrics(batch, self.encoder)
+        scores = compute_similarity_scores(batch, self.encoder)
         targets = torch.zeros_like(scores)
         targets[:, 0] = 1
         loss = F.cross_entropy(scores, targets)
         recall_at_1 = recall_at_k(scores, 1)
         recall_at_3 = recall_at_k(scores, 3)
+        recall_at_10 = recall_at_k(scores, 10)
+        recall_at_100 = recall_at_k(scores, 100)
         self.log("test_loss", loss)
         self.log("test_recall_at_1", recall_at_1)
         self.log("test_recall_at_3", recall_at_3)
+        self.log("test_recall_at_10", recall_at_10)
+        self.log("test_recall_at_100", recall_at_100)
         return loss
 
     def configure_optimizers(self):
