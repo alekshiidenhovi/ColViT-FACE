@@ -76,6 +76,10 @@ class CASIAFaceDataset(Dataset):
             id for id in self.identity_to_image_paths.keys() if id != identity
         ]
 
+        nof_other_identity_images = 0
+        for identity in other_identities:
+            nof_other_identity_images += len(self.identity_to_image_paths[identity])
+
         positive_image_path = random.choice(
             [
                 img_path
@@ -86,7 +90,10 @@ class CASIAFaceDataset(Dataset):
 
         negative_image_paths = []
         used_paths = {query_image_path, positive_image_path}
-        while len(negative_image_paths) < self.num_negative_samples:
+        while (
+            len(negative_image_paths) < self.num_negative_samples
+            or len(negative_image_paths) >= nof_other_identity_images
+        ):
             neg_identity = random.choice(other_identities)
             neg_path = random.choice(self.identity_to_image_paths[neg_identity])
             if neg_path not in used_paths:
