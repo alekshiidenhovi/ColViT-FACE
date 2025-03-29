@@ -109,11 +109,10 @@ class CASIAFaceDataset(Dataset):
         negative_imgs = [
             self.transform(Image.open(p).convert("RGB")) for p in negative_image_paths
         ]
-        negative_imgs = torch.stack(negative_imgs)
 
         return (
-            query_image.unsqueeze(0),
-            positive_image.unsqueeze(0),
+            query_image,
+            positive_image,
             negative_imgs,
             query_image_path,
             positive_image_path,
