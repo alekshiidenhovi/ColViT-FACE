@@ -1,10 +1,9 @@
-import pytest
 import sys
 import torch
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
-from src.metrics import recall_at_k
+from utils.metrics import recall_at_k
 
 
 def test_recall_at_k_perfect_match():

@@ -6,8 +6,8 @@ from collections import defaultdict
 from PIL import Image
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
-from src.logger import logger
-from src.types import TRAINING_SAMPLE
+from utils.logger import logger
+from utils.types import TRAINING_SAMPLE
 
 
 class CASIAFaceDataset(Dataset):

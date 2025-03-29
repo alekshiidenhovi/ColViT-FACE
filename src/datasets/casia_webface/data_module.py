@@ -3,8 +3,8 @@ import os
 import random
 from torchvision import transforms
 from torch.utils.data import DataLoader
-from src.datasets.casia_webface.dataset import CASIAFaceDataset
-from src.config import TrainingConfig
+from datasets.casia_webface.dataset import CASIAFaceDataset
+from utils.config import TrainingConfig
 
 
 class CASIAFaceDataModule(pl.LightningDataModule):

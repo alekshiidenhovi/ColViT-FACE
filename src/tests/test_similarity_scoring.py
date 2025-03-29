@@ -6,7 +6,7 @@ import sys
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.training.scoring import maxsim
+from training.scoring import maxsim
 
 
 @pytest.mark.parametrize(

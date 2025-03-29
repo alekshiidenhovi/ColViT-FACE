@@ -4,8 +4,8 @@ import io
 import typing as T
 from torch.utils.data import Dataset
 from PIL import Image
-from src.datasets.TSVLoader import TSVLoader
-from src.datasets.RecordReader import RecordReader
+from datasets.TSVLoader import TSVLoader
+from datasets.RecordReader import RecordReader
 from pathlib import Path
 from torchvision import transforms
 
