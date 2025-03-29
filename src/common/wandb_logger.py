@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from pytorch_lightning.loggers import WandbLogger
 
+
 def init_wandb_logger():
     """
     Initialize and configure a Weights & Biases logger.
@@ -13,18 +14,22 @@ def init_wandb_logger():
     Returns
     -------
     WandbLogger
-        Configured W&B logger instance that can be used with PyTorch Lightning.
+        The configured PyTorch Lightning W&B logger instance
 
     Notes
     -----
     Requires the following environment variables to be set:
     - WANDB_API_KEY: The Weights & Biases API key for authentication
     - WANDB_PROJECT: The name of the W&B project to log to
+    - WANDB_ENTITY: The W&B username or team name
     """
     load_dotenv()
-    wandb_api_key = os.getenv("WANDB_API_KEY")
-    wandb_project = os.getenv("WANDB_PROJECT")
-    wandb.login(key=wandb_api_key)
-    logger = WandbLogger(project=wandb_project)
-    return logger
+    WANDB_API_KEY = os.getenv("WANDB_API_KEY")
+    WANDB_PROJECT = os.getenv("WANDB_PROJECT")
+    WANDB_ENTITY = os.getenv("WANDB_ENTITY")
 
+    wandb.login(key=WANDB_API_KEY)
+
+    experiment = wandb.init(project=WANDB_PROJECT, entity=WANDB_ENTITY)
+    logger = WandbLogger(project=WANDB_PROJECT, experiment=experiment)
+    return logger
