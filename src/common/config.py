@@ -58,7 +58,8 @@ class DatasetConfig(BaseModel):
 
     @field_validator("train_val_test_split")
     def validate_split_sum(cls, v):
-        if sum(v) != 1:
+        ratio = sum(v)
+        if not abs(ratio - 1.0) < 1e-6:
             raise ValueError(
                 "Train, validation and test split proportions must sum to 1"
             )
