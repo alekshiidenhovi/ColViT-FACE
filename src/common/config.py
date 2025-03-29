@@ -120,6 +120,10 @@ class FinetuningConfig(BaseModel):
         default="bf16-mixed",
         description="Precision of gradients and the model used during finetuning",
     )
+    model_checkpoint_path: str = Field(
+        default="./.checkpoints/",
+        description="Folder for saving model checkpoints during training",
+    )
 
 
 class TrainingConfig(DatasetConfig, ModelConfig, FinetuningConfig):

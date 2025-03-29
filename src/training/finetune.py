@@ -47,6 +47,7 @@ def finetune(dataset_dir: str):
         val_check_interval=finetuning_config.val_check_interval,
         limit_val_batches=finetuning_config.limit_val_batches,
         enable_checkpointing=finetuning_config.enable_checkpointing,
+        default_root_dir=finetuning_config.model_checkpoint_path,
     )
 
     total_params_count, trainable_params_count = count_parameters(model.encoder)
