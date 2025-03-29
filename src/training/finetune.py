@@ -43,7 +43,6 @@ def finetune(dataset_dir: str):
     trainer = Trainer(
         logger=wandb_logger,
         accelerator=finetuning_config.accelerator,
-        max_steps=finetuning_config.max_steps,
         precision=finetuning_config.precision,
         val_check_interval=finetuning_config.val_check_interval,
         enable_checkpointing=finetuning_config.enable_checkpointing,
