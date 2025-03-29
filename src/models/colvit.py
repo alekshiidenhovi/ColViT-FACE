@@ -1,9 +1,11 @@
 import torch
+import torch.nn.functional as F
 import pytorch_lightning as pl
 from models.vit_encoder import VitEncoder
 from models.utils import compute_metrics
 from models.lora import LinearWithLoRA
 from common.config import TrainingConfig
+from common.metrics import recall_at_k
 
 
 class ColViT(pl.LightningModule):
@@ -42,21 +44,36 @@ class ColViT(pl.LightningModule):
         return self.encoder(tokens)
 
     def training_step(self, batch: torch.Tensor, batch_idx):
-        loss, recall_at_1, recall_at_3 = compute_metrics(batch, self.encoder)
+        scores = compute_metrics(batch, self.encoder)
+        targets = torch.zeros_like(scores)
+        targets[:, 0] = 1
+        loss = F.cross_entropy(scores, targets)
+        recall_at_1 = recall_at_k(scores, 1)
+        recall_at_3 = recall_at_k(scores, 3)
         self.log("train_loss", loss)
         self.log("train_recall_at_1", recall_at_1)
         self.log("train_recall_at_3", recall_at_3)
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx):
-        loss, recall_at_1, recall_at_3 = compute_metrics(batch, self.encoder)
+        scores = compute_metrics(batch, self.encoder)
+        targets = torch.zeros_like(scores)
+        targets[:, 0] = 1
+        loss = F.cross_entropy(scores, targets)
+        recall_at_1 = recall_at_k(scores, 1)
+        recall_at_3 = recall_at_k(scores, 3)
         self.log("val_loss", loss)
         self.log("val_recall_at_1", recall_at_1)
         self.log("val_recall_at_3", recall_at_3)
         return loss
 
     def testing_step(self, batch: torch.Tensor, batch_idx):
-        loss, recall_at_1, recall_at_3 = compute_metrics(batch, self.encoder)
+        scores = compute_metrics(batch, self.encoder)
+        targets = torch.zeros_like(scores)
+        targets[:, 0] = 1
+        loss = F.cross_entropy(scores, targets)
+        recall_at_1 = recall_at_k(scores, 1)
+        recall_at_3 = recall_at_k(scores, 3)
         self.log("test_loss", loss)
         self.log("test_recall_at_1", recall_at_1)
         self.log("test_recall_at_3", recall_at_3)
