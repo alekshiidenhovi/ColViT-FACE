@@ -49,19 +49,19 @@ class CASIAFaceDataModule(pl.LightningDataModule):
             self.config.dataset_dir,
             identities=train_identities,
             transform=self.transform,
-            num_negative_samples=self.config.num_negative_samples,
+            num_negative_samples=self.config.train_num_negative_samples,
         )
         self.val_dataset = CASIAFaceDataset(
             self.config.dataset_dir,
             identities=val_identities,
             transform=self.transform,
-            num_negative_samples=self.config.num_negative_samples,
+            num_negative_samples=self.config.val_num_negative_samples,
         )
         self.test_dataset = CASIAFaceDataset(
             self.config.dataset_dir,
             identities=test_identities,
             transform=self.transform,
-            num_negative_samples=self.config.num_negative_samples,
+            num_negative_samples=self.config.test_num_negative_samples,
         )
 
     def train_dataloader(self):

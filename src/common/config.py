@@ -24,9 +24,17 @@ class TrainingConfig(BaseModel):
         default=(0.95, 0.01, 0.04),
         description="Train, validation, and test split proportions",
     )
-    num_negative_samples: int = Field(
+    train_num_negative_samples: int = Field(
         default=7,
-        description="Number of negative samples to return per anchor image",
+        description="Number of negative samples to return per anchor image during training",
+    )
+    val_num_negative_samples: int = Field(
+        default=63,
+        description="Number of negative samples to return per anchor image during validation",
+    )
+    test_num_negative_samples: int = Field(
+        default=1000,
+        description="Number of negative samples to return per anchor image during testing",
     )
     pretrained_vit_name: BASE_MODEL = Field(
         default="vit_small_patch16_384.augreg_in21k_ft_in1k",
