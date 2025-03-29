@@ -45,6 +45,7 @@ def finetune(dataset_dir: str):
         accelerator=finetuning_config.accelerator,
         precision=finetuning_config.precision,
         val_check_interval=finetuning_config.val_check_interval,
+        limit_val_batches=finetuning_config.limit_val_batches,
         enable_checkpointing=finetuning_config.enable_checkpointing,
     )
 

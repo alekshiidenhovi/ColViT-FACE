@@ -40,7 +40,7 @@ class DatasetConfig(BaseModel):
         description="Size of the input images",
     )
     train_val_test_split: T.Tuple[float, float, float] = Field(
-        default=(0.95, 0.01, 0.04),
+        default=(0.95, 0.0025, 0.0475),
         description="Train, validation, and test split proportions",
     )
     train_num_negative_samples: int = Field(
@@ -108,9 +108,12 @@ class FinetuningConfig(BaseModel):
         default=True, description="Enables checkpointing of the latest training epoch"
     )
     val_check_interval: int = Field(
-        default=100,
+        default=200,
         ge=10,
         description="The interval of training batched to run validation",
+    )
+    limit_val_batches: int = Field(
+        default=20, description="Number of validation batches to run", ge=1
     )
     precision: PRECISION = Field(
         default="bf16-mixed",
