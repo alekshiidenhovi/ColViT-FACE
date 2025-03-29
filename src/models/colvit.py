@@ -8,6 +8,7 @@ from common.config import TrainingConfig
 
 class ColViT(pl.LightningModule):
     def __init__(self, config: TrainingConfig):
+        super().__init__()
         self.encoder = VitEncoder(
             config.token_embedding_dim, config.pretrained_vit_name
         )
@@ -16,9 +17,6 @@ class ColViT(pl.LightningModule):
         for param in self.encoder.parameters():
             param.requires_grad = False
 
-        self._add_lora_layers()
-
-    def _add_lora_layers(self):
         for block in self.encoder.model.blocks:
             block.attn.qkv = LinearWithLoRA(
                 block.attn.qkv, self.config.lora_rank, self.config.lora_alpha
@@ -32,6 +30,13 @@ class ColViT(pl.LightningModule):
             block.mlp.fc2 = LinearWithLoRA(
                 block.mlp.fc2, self.config.lora_rank, self.config.lora_alpha
             )
+
+        for param in self.encoder.dim_reduction.parameters():
+            param.requires_grad = True
+
+        for name, param in self.encoder.named_parameters():
+            if "lora" in name:
+                param.requires_grad = True
 
     def forward(self, tokens: torch.Tensor) -> torch.Tensor:
         return self.encoder(tokens)
