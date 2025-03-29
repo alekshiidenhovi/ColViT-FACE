@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, field_validator
 import typing as T
 
 BASE_MODEL = T.Literal["vit_small_patch16_384.augreg_in21k_ft_in1k"]
+ACCELERATOR = T.Literal["gpu", "cpu", "tpu"]
 
 
 class DatasetConfig(BaseModel):
@@ -66,6 +67,15 @@ class ModelConfig(BaseModel):
     token_embedding_dim: int = Field(
         default=128, ge=1, description="Final dimension of the token embeddings"
     )
+    learning_rate: float = Field(
+        default=1e-5, ge=0, description="Learning rate of the model"
+    )
+    lora_rank: int = Field(
+        default=8, description="Rank of the LoRA decomposition matrix", ge=2
+    )
+    lora_alpha: int = Field(
+        default=8, description="Scaling factor for the LoRA decomposition matrix", ge=1
+    )
 
 
 class FinetuningConfig(BaseModel):
@@ -75,6 +85,10 @@ class FinetuningConfig(BaseModel):
     checkpointing settings and LoRA-specific parameters.
     """
 
+    accelerator: ACCELERATOR = Field(
+        default="gpu",
+        description="Compute accelerator to use for training",
+    )
     warmup_steps: int = Field(
         default=1000, ge=0, description="Number of steps to warmup the learning rate"
     )
@@ -88,15 +102,6 @@ class FinetuningConfig(BaseModel):
         default=100,
         ge=10,
         description="The interval of training batched to run validation",
-    )
-    learning_rate: float = Field(
-        default=1e-5, ge=0, description="Learning rate of the model"
-    )
-    lora_rank: int = Field(
-        default=8, description="Rank of the LoRA decomposition matrix", ge=2
-    )
-    lora_alpha: int = Field(
-        default=8, description="Scaling factor for the LoRA decomposition matrix", ge=1
     )
 
 

@@ -4,33 +4,37 @@ import pytorch_lightning as pl
 from models.vit_encoder import VitEncoder
 from models.utils import compute_similarity_scores
 from models.lora import LinearWithLoRA
-from common.config import TrainingConfig
+from common.config import ModelConfig
 from common.metrics import recall_at_k
 
 
 class ColViT(pl.LightningModule):
-    def __init__(self, config: TrainingConfig):
+    def __init__(self, model_config: ModelConfig):
         super().__init__()
         self.encoder = VitEncoder(
-            config.token_embedding_dim, config.pretrained_vit_name
+            model_config.token_embedding_dim, model_config.pretrained_vit_name
         )
-        self.config = config
+        self.model_config = model_config
 
         for param in self.encoder.parameters():
             param.requires_grad = False
 
         for block in self.encoder.model.blocks:
             block.attn.qkv = LinearWithLoRA(
-                block.attn.qkv, self.config.lora_rank, self.config.lora_alpha
+                block.attn.qkv,
+                self.model_config.lora_rank,
+                self.model_config.lora_alpha,
             )
             block.attn.proj = LinearWithLoRA(
-                block.attn.proj, self.config.lora_rank, self.config.lora_alpha
+                block.attn.proj,
+                self.model_config.lora_rank,
+                self.model_config.lora_alpha,
             )
             block.mlp.fc1 = LinearWithLoRA(
-                block.mlp.fc1, self.config.lora_rank, self.config.lora_alpha
+                block.mlp.fc1, self.model_config.lora_rank, self.model_config.lora_alpha
             )
             block.mlp.fc2 = LinearWithLoRA(
-                block.mlp.fc2, self.config.lora_rank, self.config.lora_alpha
+                block.mlp.fc2, self.model_config.lora_rank, self.model_config.lora_alpha
             )
 
         for param in self.encoder.dim_reduction.parameters():
@@ -86,5 +90,7 @@ class ColViT(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.config.learning_rate)
+        optimizer = torch.optim.Adam(
+            self.parameters(), lr=self.model_config.learning_rate
+        )
         return optimizer
