@@ -85,10 +85,13 @@ class CASIAFaceDataset(Dataset):
         )
 
         negative_image_paths = []
-        for _ in range(self.num_negative_samples):
+        used_paths = {query_image_path, positive_image_path}
+        while len(negative_image_paths) < self.num_negative_samples:
             neg_identity = random.choice(other_identities)
             neg_path = random.choice(self.identity_to_image_paths[neg_identity])
-            negative_image_paths.append(neg_path)
+            if neg_path not in used_paths:
+                negative_image_paths.append(neg_path)
+                used_paths.add(neg_path)
 
         query_image: torch.Tensor = self.transform(
             Image.open(query_image_path).convert("RGB")
