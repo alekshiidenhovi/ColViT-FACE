@@ -35,8 +35,12 @@ def finetune(dataset_dir: str):
     gpu_info = get_gpu_info_from_nvidia_smi()
 
     logger.info("Logging training configs and GPU info to W&B...")
+    total_params_count, trainable_params_count = count_parameters(model.encoder)
     wandb_logger.experiment.config.update(training_config.model_dump())
     wandb_logger.experiment.config.update({"gpu_info": gpu_info})
+    wandb_logger.experiment.config.update(
+        {"total_params": total_params_count, "trainable_params": trainable_params_count}
+    )
     wandb_logger.watch(model)
 
     logger.info("Initializing Lightning Trainer...")
@@ -48,11 +52,6 @@ def finetune(dataset_dir: str):
         limit_val_batches=finetuning_config.limit_val_batches,
         enable_checkpointing=finetuning_config.enable_checkpointing,
         default_root_dir=finetuning_config.model_checkpoint_path,
-    )
-
-    total_params_count, trainable_params_count = count_parameters(model.encoder)
-    wandb_logger.log_metrics(
-        {"total_params": total_params_count, "trainable_params": trainable_params_count}
     )
 
     logger.info("Starting model finetuning...")
