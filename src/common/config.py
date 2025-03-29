@@ -4,7 +4,13 @@ import typing as T
 BASE_MODEL = T.Literal["vit_small_patch16_384.augreg_in21k_ft_in1k"]
 
 
-class TrainingConfig(BaseModel):
+class DatasetConfig(BaseModel):
+    """Configuration for dataset loading and preprocessing.
+
+    Contains parameters for data loading, batch sizes, image dimensions,
+    dataset splits, and sampling configurations for training, validation and testing.
+    """
+
     dataset_dir: str = Field(
         description="Path to the dataset directory",
     )
@@ -36,6 +42,23 @@ class TrainingConfig(BaseModel):
         default=1000,
         description="Number of negative samples to return per anchor image during testing",
     )
+
+    @field_validator("train_val_test_split")
+    def validate_split_sum(cls, v):
+        if sum(v) != 1:
+            raise ValueError(
+                "Train, validation and test split proportions must sum to 1"
+            )
+        return v
+
+
+class ModelConfig(BaseModel):
+    """Configuration for the model architecture.
+
+    Defines parameters for the vision transformer model including the pretrained model name
+    and embedding dimensions.
+    """
+
     pretrained_vit_name: BASE_MODEL = Field(
         default="vit_small_patch16_384.augreg_in21k_ft_in1k",
         description="Name of the pretrained vision transformer to use",
@@ -43,9 +66,15 @@ class TrainingConfig(BaseModel):
     token_embedding_dim: int = Field(
         default=128, ge=1, description="Final dimension of the token embeddings"
     )
-    learning_rate: float = Field(
-        default=3e-5, ge=0, description="Learning rate of the model"
-    )
+
+
+class FinetuningConfig(BaseModel):
+    """Configuration for model fine-tuning.
+
+    Contains training hyperparameters including learning rate schedules, validation intervals,
+    checkpointing settings and LoRA-specific parameters.
+    """
+
     warmup_steps: int = Field(
         default=1000, ge=0, description="Number of steps to warmup the learning rate"
     )
@@ -60,10 +89,6 @@ class TrainingConfig(BaseModel):
         ge=10,
         description="The interval of training batched to run validation",
     )
-    seed: int = Field(
-        default=42,
-        description="Seed for training reproducibility",
-    )
     learning_rate: float = Field(
         default=1e-5, ge=0, description="Learning rate of the model"
     )
@@ -74,10 +99,46 @@ class TrainingConfig(BaseModel):
         default=8, description="Scaling factor for the LoRA decomposition matrix", ge=1
     )
 
-    @field_validator("train_val_test_split")
-    def validate_split_sum(cls, v):
-        if sum(v) != 1:
-            raise ValueError(
-                "Train, validation and test split proportions must sum to 1"
-            )
-        return v
+
+class TrainingConfig(DatasetConfig, ModelConfig, FinetuningConfig):
+    """Complete training configuration combining dataset, model and fine-tuning settings.
+
+    Inherits from DatasetConfig, ModelConfig and FinetuningConfig to provide a comprehensive
+    configuration for the entire training pipeline, including an additional seed parameter
+    for reproducibility.
+    """
+
+    seed: int = Field(
+        default=42,
+        description="Seed for training reproducibility",
+    )
+
+    def get_dataset_config(self) -> DatasetConfig:
+        """Get dataset-specific configuration."""
+        return DatasetConfig(
+            **{
+                k: v
+                for k, v in self.model_dump().items()
+                if k in DatasetConfig.model_fields
+            }
+        )
+
+    def get_model_config(self) -> ModelConfig:
+        """Get model architecture configuration."""
+        return ModelConfig(
+            **{
+                k: v
+                for k, v in self.model_dump().items()
+                if k in ModelConfig.model_fields
+            }
+        )
+
+    def get_finetuning_config(self) -> FinetuningConfig:
+        """Get fine-tuning hyperparameters configuration."""
+        return FinetuningConfig(
+            **{
+                k: v
+                for k, v in self.model_dump().items()
+                if k in FinetuningConfig.model_fields
+            }
+        )
