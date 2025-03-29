@@ -24,7 +24,7 @@ class DatasetConfig(BaseModel):
         default=4, description="Number of workers for data loading", ge=1
     )
     img_size: int = Field(
-        default=256,
+        default=384,
         description="Size of the input images",
     )
     train_val_test_split: T.Tuple[float, float, float] = Field(
