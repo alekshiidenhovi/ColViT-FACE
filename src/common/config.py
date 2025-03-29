@@ -3,6 +3,10 @@ import typing as T
 
 BASE_MODEL = T.Literal["vit_small_patch16_384.augreg_in21k_ft_in1k"]
 ACCELERATOR = T.Literal["gpu", "cpu", "tpu"]
+PRECISION = T.Literal[
+    "bf16-mixed",
+    "32",
+]
 
 
 class DatasetConfig(BaseModel):
@@ -15,13 +19,21 @@ class DatasetConfig(BaseModel):
     dataset_dir: str = Field(
         description="Path to the dataset directory",
     )
-    batch_size: int = Field(
-        default=32,
+    train_batch_size: int = Field(
+        default=8,
         ge=4,
         description="Batch size for training",
     )
+    val_batch_size: int = Field(
+        default=4,
+        description="Batch size for validation",
+    )
+    test_batch_size: int = Field(
+        default=1,
+        description="Batch size for testing",
+    )
     num_workers: int = Field(
-        default=4, description="Number of workers for data loading", ge=1
+        default=8, description="Number of workers for data loading", ge=1
     )
     img_size: int = Field(
         default=384,
@@ -102,6 +114,10 @@ class FinetuningConfig(BaseModel):
         default=100,
         ge=10,
         description="The interval of training batched to run validation",
+    )
+    precision: PRECISION = Field(
+        default="bf16-mixed",
+        description="Precision of gradients and the model used during finetuning",
     )
 
 

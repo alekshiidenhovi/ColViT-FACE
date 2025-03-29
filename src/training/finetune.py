@@ -44,6 +44,7 @@ def finetune(dataset_dir: str):
         accelerator=finetuning_config.accelerator,
         max_steps=finetuning_config.max_steps,
         logger=wandb_logger,
+        precision=finetuning_config.precision
     )
 
     total_params_count, trainable_params_count = count_parameters(model.encoder)

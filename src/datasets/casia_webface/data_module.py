@@ -69,7 +69,7 @@ class CASIAFaceDataModule(pl.LightningDataModule):
     def train_dataloader(self):
         return DataLoader(
             dataset=self.train_dataset,
-            batch_size=self.dataset_config.batch_size,
+            batch_size=self.dataset_config.train_batch_size,
             shuffle=True,
             num_workers=self.dataset_config.num_workers,
             pin_memory=True,
@@ -78,7 +78,7 @@ class CASIAFaceDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         return DataLoader(
             dataset=self.val_dataset,
-            batch_size=self.dataset_config.batch_size,
+            batch_size=self.dataset_config.val_batch_size,
             shuffle=False,
             num_workers=self.dataset_config.num_workers,
             pin_memory=True,
@@ -87,7 +87,7 @@ class CASIAFaceDataModule(pl.LightningDataModule):
     def test_dataloader(self):
         return DataLoader(
             dataset=self.test_dataset,
-            batch_size=self.dataset_config.batch_size,
+            batch_size=self.dataset_config.test_batch_size,
             shuffle=False,
             num_workers=self.dataset_config.num_workers,
             pin_memory=True,
