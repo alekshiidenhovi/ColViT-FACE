@@ -1,7 +1,6 @@
 import timm
 import torch.nn as nn
 import torch
-from einops import einsum
 
 
 class VitEncoder(nn.Module):
@@ -15,18 +14,13 @@ class VitEncoder(nn.Module):
         hidden_dim: int | None = getattr(self.model, "embed_dim", None)
         if hidden_dim is None:
             raise ValueError("Cannot find embed_dim attribute on model.")
+        
+        self.dim_reduction = nn.Linear(hidden_dim, reduced_dim)
         std_dev = 1 / torch.sqrt(torch.tensor(reduced_dim).float())
-        self.weights = nn.Parameter(torch.randn(hidden_dim, reduced_dim) * std_dev)
-        self.bias = nn.Parameter(torch.zeros(reduced_dim))
+        self.dim_reduction.weight.data.normal_(0, std_dev)
+        self.dim_reduction.bias.data.zero_()
 
-    def forward(self, x):
-        tokens = self.model.forward_features(x)
-        tokens = (
-            einsum(
-                tokens,
-                self.weights,
-                "batch_size seq_len hidden_dim, hidden_dim reduced_dim -> batch_size seq_len reduced_dim",
-            )
-            + self.bias
-        )
-        return tokens
+    def forward(self, input_tokens: torch.Tensor):
+        intermediate_tokens = self.model.forward_features(input_tokens)
+        output_tokens = self.dim_reduction(intermediate_tokens)
+        return output_tokens
