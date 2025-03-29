@@ -1,4 +1,5 @@
 import subprocess
+from common.logger import logger
 
 
 def get_gpu_info_from_nvidia_smi():
@@ -14,13 +15,6 @@ def get_gpu_info_from_nvidia_smi():
         string contains comma-separated values in the format:
         "GPU name, total memory (MiB), driver version"
         Returns None if nvidia-smi command fails or is not found.
-
-    Raises
-    ------
-    FileNotFoundError
-        If nvidia-smi executable is not found on the system path
-    subprocess.SubprocessError
-        If nvidia-smi command execution fails
     """
 
     try:
@@ -42,10 +36,10 @@ def get_gpu_info_from_nvidia_smi():
         return tuple(gpu_info) if gpu_info else None
 
     except FileNotFoundError:
-        raise FileNotFoundError(
+        logger.warning(
             "nvidia-smi command not found. Please ensure NVIDIA drivers are installed correctly."
         )
+        return None
     except subprocess.SubprocessError as e:
-        raise subprocess.SubprocessError(
-            f"Failed to execute nvidia-smi command: {str(e)}"
-        )
+        logger.warning(f"Failed to execute nvidia-smi command: {str(e)}")
+        return None
