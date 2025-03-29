@@ -41,10 +41,12 @@ def finetune(dataset_dir: str):
 
     logger.info("Initializing Lightning Trainer...")
     trainer = Trainer(
+        logger=wandb_logger,
         accelerator=finetuning_config.accelerator,
         max_steps=finetuning_config.max_steps,
-        logger=wandb_logger,
-        precision=finetuning_config.precision
+        precision=finetuning_config.precision,
+        val_check_interval=finetuning_config.val_check_interval,
+        enable_checkpointing=finetuning_config.enable_checkpointing,
     )
 
     total_params_count, trainable_params_count = count_parameters(model.encoder)

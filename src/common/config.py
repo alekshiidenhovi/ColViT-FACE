@@ -104,9 +104,6 @@ class FinetuningConfig(BaseModel):
     warmup_steps: int = Field(
         default=1000, ge=0, description="Number of steps to warmup the learning rate"
     )
-    max_steps: int = Field(
-        description="Maximum number of steps to train the model", ge=0, default=10000
-    )
     enable_checkpointing: bool = Field(
         default=True, description="Enables checkpointing of the latest training epoch"
     )
