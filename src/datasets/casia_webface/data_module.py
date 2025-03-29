@@ -1,4 +1,4 @@
-import lightning as pl
+import pytorch_lightning as pl
 import os
 import random
 from torchvision import transforms

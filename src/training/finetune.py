@@ -1,5 +1,6 @@
 import click
 import time
+
 from models.colvit import ColViT
 from common.config import TrainingConfig
 from common.nvidia import get_gpu_info_from_nvidia_smi
@@ -7,7 +8,7 @@ from common.logger import logger
 from common.wandb_logger import init_wandb_logger
 from common.parameters import count_parameters
 from datasets.casia_webface.data_module import CASIAFaceDataModule
-from lightning.pytorch import Trainer, seed_everything
+from pytorch_lightning import Trainer, seed_everything
 
 
 @click.command()
@@ -15,9 +16,10 @@ from lightning.pytorch import Trainer, seed_everything
     "--dataset-dir", help="Absolute path to the CASIA dataset directory", type=str
 )
 def finetune(dataset_dir: str):
+    print("Starting finetuning process...")
     start_time = time.time()
     wandb_logger = init_wandb_logger()
-    logger.info(f"Starting finetuning experiment: {wandb_logger.experiment.name}")
+    logger.info(f"Initializing finetuning experiment: {wandb_logger.experiment.name}")
 
     logger.info("Initializing training configs...")
     training_config = TrainingConfig(dataset_dir=dataset_dir)
