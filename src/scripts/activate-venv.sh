@@ -1,2 +1,4 @@
 #!/bin/bash
-source ~/ColViT-FACE/.venv/bin/activate
+PROJECT_DIR=${1:-$(pwd)}
+
+source "$PROJECT_DIR/.venv/bin/activate"

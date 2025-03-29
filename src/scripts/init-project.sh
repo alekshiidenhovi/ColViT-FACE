@@ -1,4 +1,6 @@
 #!/bin/bash
-source ~/ColViT-FACE/scripts/install-uv.sh
-source ~/ColViT-FACE/scripts/create-venv.sh
-source ~/ColViT-FACE/scripts/sync-deps-dev.sh
+PROJECT_DIR=${1:-$(pwd)}
+
+source "$PROJECT_DIR/scripts/install-uv.sh"
+source "$PROJECT_DIR/scripts/create-venv.sh"
+source "$PROJECT_DIR/scripts/sync-deps-dev.sh"
