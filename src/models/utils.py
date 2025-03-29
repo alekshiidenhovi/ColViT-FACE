@@ -1,6 +1,6 @@
 import torch
 from training.scoring import maxsim
-from utils.metrics import recall_at_k
+from common.metrics import recall_at_k
 
 
 def compute_metrics(batch: torch.Tensor, encoder: torch.nn.Module):

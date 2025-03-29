@@ -3,7 +3,7 @@ import pytorch_lightning as pl
 from models.vit_encoder import VitEncoder
 from models.utils import compute_metrics
 from models.lora import LinearWithLoRA
-from utils.config import TrainingConfig
+from common.config import TrainingConfig
 
 
 class ColViT(pl.LightningModule):
