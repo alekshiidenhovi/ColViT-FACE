@@ -20,7 +20,7 @@ class DatasetConfig(BaseModel):
         description="Path to the dataset directory",
     )
     train_batch_size: int = Field(
-        default=8,
+        default=64,
         ge=4,
         description="Batch size for training",
     )
@@ -44,7 +44,7 @@ class DatasetConfig(BaseModel):
         description="Train, validation, and test split proportions",
     )
     train_num_negative_samples: int = Field(
-        default=7,
+        default=3,
         description="Number of negative samples to return per anchor image during training",
     )
     val_num_negative_samples: int = Field(
@@ -109,7 +109,7 @@ class FinetuningConfig(BaseModel):
         default=True, description="Enables checkpointing of the latest training epoch"
     )
     val_check_interval: int = Field(
-        default=200,
+        default=25,
         ge=10,
         description="The interval of training batched to run validation",
     )
