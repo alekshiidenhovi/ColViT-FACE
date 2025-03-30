@@ -49,7 +49,7 @@ class ColViT(pl.LightningModule):
 
     def training_step(self, batch: torch.Tensor, batch_idx):
         scores = compute_similarity_scores(batch, self.encoder)
-        targets = torch.zeros(scores.size(0), dtype=torch.float32)
+        targets = torch.zeros(scores.size(0), dtype=torch.int64, device=self.device)
         loss = F.cross_entropy(scores, targets)
         recall_at_1 = recall_at_k(scores, 1)
         recall_at_3 = recall_at_k(scores, 3)
@@ -60,7 +60,7 @@ class ColViT(pl.LightningModule):
 
     def validation_step(self, batch: torch.Tensor, batch_idx):
         scores = compute_similarity_scores(batch, self.encoder)
-        targets = torch.zeros(scores.size(0), dtype=torch.float32)
+        targets = torch.zeros(scores.size(0), dtype=torch.int64, device=self.device)
         loss = F.cross_entropy(scores, targets)
         recall_at_1 = recall_at_k(scores, 1)
         recall_at_3 = recall_at_k(scores, 3)
@@ -73,7 +73,7 @@ class ColViT(pl.LightningModule):
 
     def testing_step(self, batch: torch.Tensor, batch_idx):
         scores = compute_similarity_scores(batch, self.encoder)
-        targets = torch.zeros(scores.size(0), dtype=torch.float32)
+        targets = torch.zeros(scores.size(0), dtype=torch.int64, device=self.device)
         loss = F.cross_entropy(scores, targets)
         recall_at_1 = recall_at_k(scores, 1)
         recall_at_3 = recall_at_k(scores, 3)
