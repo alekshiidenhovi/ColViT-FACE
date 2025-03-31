@@ -3,7 +3,7 @@ import torch
 # Source: https://lightning.ai/lightning-ai/studios/code-lora-from-scratch?view=public&section=featured
 
 
-class LoRALayer(torch.nn.Module):
+class RSLoRALayer(torch.nn.Module):
     def __init__(self, in_dim: int, out_dim: int, rank: int, alpha: int):
         """Initialize a LoRA (Low-Rank Adaptation) layer.
 
@@ -33,11 +33,11 @@ class LoRALayer(torch.nn.Module):
         self.rank = rank
 
     def forward(self, x):
-        x = (self.alpha / self.rank) * (x @ self.A @ self.B)
+        x = (self.alpha / (self.rank**2)) * (x @ self.A @ self.B)
         return x
 
 
-class LinearWithLoRA(torch.nn.Module):
+class LinearWithRSLoRA(torch.nn.Module):
     def __init__(self, linear: torch.nn.Linear, rank: int, alpha: int):
         """Initialize a Linear layer with LoRA adaptation.
 
@@ -57,7 +57,7 @@ class LinearWithLoRA(torch.nn.Module):
         """
         super().__init__()
         self.linear = linear
-        self.lora = LoRALayer(linear.in_features, linear.out_features, rank, alpha)
+        self.lora = RSLoRALayer(linear.in_features, linear.out_features, rank, alpha)
 
     def forward(self, x):
         return self.linear(x) + self.lora(x)

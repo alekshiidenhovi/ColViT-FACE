@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 from models.vit_encoder import VitEncoder
 from models.utils import compute_similarity_scores
-from models.lora import LinearWithLoRA
+from models.lora import LinearWithRSLoRA
 from common.config import ModelConfig
 from common.metrics import recall_at_k
 
@@ -20,20 +20,20 @@ class ColViT(pl.LightningModule):
             param.requires_grad = False
 
         for block in self.encoder.model.blocks:
-            block.attn.qkv = LinearWithLoRA(
+            block.attn.qkv = LinearWithRSLoRA(
                 block.attn.qkv,
                 self.model_config.lora_rank,
                 self.model_config.lora_alpha,
             )
-            block.attn.proj = LinearWithLoRA(
+            block.attn.proj = LinearWithRSLoRA(
                 block.attn.proj,
                 self.model_config.lora_rank,
                 self.model_config.lora_alpha,
             )
-            block.mlp.fc1 = LinearWithLoRA(
+            block.mlp.fc1 = LinearWithRSLoRA(
                 block.mlp.fc1, self.model_config.lora_rank, self.model_config.lora_alpha
             )
-            block.mlp.fc2 = LinearWithLoRA(
+            block.mlp.fc2 = LinearWithRSLoRA(
                 block.mlp.fc2, self.model_config.lora_rank, self.model_config.lora_alpha
             )
 
