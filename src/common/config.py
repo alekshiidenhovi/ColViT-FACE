@@ -124,6 +124,11 @@ class FinetuningConfig(BaseModel):
         default="./.checkpoints/",
         description="Folder for saving model checkpoints during training",
     )
+    max_epochs: int = Field(
+        default=4,
+        ge=1,
+        description="Maximum number of epochs to train for",
+    )
 
 
 class TrainingConfig(DatasetConfig, ModelConfig, FinetuningConfig):
