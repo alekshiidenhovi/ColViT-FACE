@@ -46,6 +46,7 @@ def finetune(dataset_dir: str):
     logger.info("Initializing Lightning Trainer...")
     trainer = Trainer(
         logger=wandb_logger,
+        devices=finetuning_config.devices,
         accelerator=finetuning_config.accelerator,
         precision=finetuning_config.precision,
         val_check_interval=finetuning_config.val_check_interval,

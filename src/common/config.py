@@ -129,6 +129,10 @@ class FinetuningConfig(BaseModel):
         ge=1,
         description="Maximum number of epochs to train for",
     )
+    devices: T.List[int] = Field(
+        default=[0],
+        description="GPU devices to use for training",
+    )
 
 
 class TrainingConfig(DatasetConfig, ModelConfig, FinetuningConfig):
