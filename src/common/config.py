@@ -2,7 +2,10 @@ from pydantic import BaseModel, Field, field_validator
 import typing as T
 import multiprocessing
 
-BASE_MODEL = T.Literal["vit_small_patch16_384.augreg_in21k_ft_in1k"]
+BASE_MODEL = T.Literal[
+    "vit_small_patch16_384.augreg_in21k_ft_in1k",
+    "vit_base_patch8_224.augreg2_in21k_ft_in1k",
+]
 ACCELERATOR = T.Literal["gpu", "cpu", "tpu"]
 PRECISION = T.Literal[
     "bf16-mixed",
@@ -84,13 +87,13 @@ class ModelConfig(BaseModel):
         default=128, ge=1, description="Final dimension of the token embeddings"
     )
     learning_rate: float = Field(
-        default=3e-5, ge=0, description="Learning rate of the model"
+        default=1e-5, ge=0, description="Learning rate of the model"
     )
     lora_rank: int = Field(
         default=16, description="Rank of the LoRA decomposition matrix", ge=2
     )
     lora_alpha: int = Field(
-        default=4, description="Scaling factor for the LoRA decomposition matrix", ge=1
+        default=8, description="Scaling factor for the LoRA decomposition matrix", ge=1
     )
 
 
@@ -104,9 +107,6 @@ class FinetuningConfig(BaseModel):
     accelerator: ACCELERATOR = Field(
         default="gpu",
         description="Compute accelerator to use for training",
-    )
-    warmup_steps: int = Field(
-        default=1000, ge=0, description="Number of steps to warmup the learning rate"
     )
     enable_checkpointing: bool = Field(
         default=True, description="Enables checkpointing of the latest training epoch"
@@ -128,7 +128,7 @@ class FinetuningConfig(BaseModel):
         description="Folder for saving model checkpoints during training",
     )
     max_epochs: int = Field(
-        default=4,
+        default=8,
         ge=1,
         description="Maximum number of epochs to train for",
     )
