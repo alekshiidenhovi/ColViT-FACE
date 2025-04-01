@@ -112,12 +112,12 @@ class FinetuningConfig(BaseModel):
         default=True, description="Enables checkpointing of the latest training epoch"
     )
     val_check_interval: int = Field(
-        default=25,
+        default=100,
         ge=10,
         description="The interval of training batched to run validation",
     )
     limit_val_batches: int = Field(
-        default=20, description="Number of validation batches to run", ge=1
+        default=50, description="Number of validation batches to run", ge=1
     )
     precision: PRECISION = Field(
         default="bf16-mixed",
