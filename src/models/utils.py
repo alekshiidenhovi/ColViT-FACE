@@ -17,7 +17,7 @@ def compute_similarity_scores(batch: torch.Tensor, encoder: torch.nn.Module):
     all_reprs = F.normalize(all_reprs, p=2, dim=-1)
     all_reprs = rearrange(
         all_reprs,
-        "(batch_size num_images) height width channel -> batch_size num_images height width channel",
+        "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
         b=batch_size,
         n=num_images,
     )
