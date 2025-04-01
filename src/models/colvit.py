@@ -52,10 +52,8 @@ class ColViT(L.LightningModule):
         targets = torch.zeros(scores.size(0), dtype=torch.int64, device=self.device)
         loss = F.cross_entropy(scores, targets)
         recall_at_1 = recall_at_k(scores, 1)
-        recall_at_3 = recall_at_k(scores, 3)
         self.log("train_loss", loss)
         self.log("train_recall_at_1", recall_at_1)
-        self.log("train_recall_at_3", recall_at_3)
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx):

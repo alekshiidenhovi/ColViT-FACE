@@ -21,7 +21,7 @@ class DatasetConfig(BaseModel):
         description="Path to the dataset directory",
     )
     train_batch_size: int = Field(
-        default=32,
+        default=64,
         ge=4,
         description="Batch size for training",
     )
@@ -47,7 +47,7 @@ class DatasetConfig(BaseModel):
         description="Train, validation, and test split proportions",
     )
     train_num_negative_samples: int = Field(
-        default=3,
+        default=1,
         description="Number of negative samples to return per anchor image during training",
     )
     val_num_negative_samples: int = Field(
@@ -137,7 +137,7 @@ class FinetuningConfig(BaseModel):
         description="GPU devices to use for training",
     )
     accumulate_grad_batches: int = Field(
-        default=2,
+        default=1,
         ge=1,
         description="Number of batches to accumulate gradients before updating the model",
     )
