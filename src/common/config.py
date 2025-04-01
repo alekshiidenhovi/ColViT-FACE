@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 import typing as T
+import multiprocessing
 
 BASE_MODEL = T.Literal["vit_small_patch16_384.augreg_in21k_ft_in1k"]
 ACCELERATOR = T.Literal["gpu", "cpu", "tpu"]
@@ -33,7 +34,9 @@ class DatasetConfig(BaseModel):
         description="Batch size for testing",
     )
     num_workers: int = Field(
-        default=8, description="Number of workers for data loading", ge=1
+        default=multiprocessing.cpu_count() - 2,
+        description="Number of workers for data loading",
+        ge=1,
     )
     img_size: int = Field(
         default=384,
