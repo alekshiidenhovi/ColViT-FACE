@@ -18,8 +18,8 @@ def compute_similarity_scores(batch: torch.Tensor, encoder: torch.nn.Module):
     all_reprs = rearrange(
         all_reprs,
         "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
-        b=batch_size,
-        n=num_images,
+        batch_size=batch_size,
+        num_images=num_images,
     )
     query_repr = all_reprs[:, 0]  # [batch_size, seq_len, reduced_dim]
     query_repr = repeat(
