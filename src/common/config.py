@@ -40,7 +40,7 @@ class DatasetConfig(BaseModel):
         description="Size of the input images",
     )
     train_val_test_split: T.Tuple[float, float, float] = Field(
-        default=(0.95, 0.0025, 0.0475),
+        default=(0.95, 0.005, 0.045),
         description="Train, validation, and test split proportions",
     )
     train_num_negative_samples: int = Field(
