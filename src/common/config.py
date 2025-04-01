@@ -81,7 +81,7 @@ class ModelConfig(BaseModel):
         default=128, ge=1, description="Final dimension of the token embeddings"
     )
     learning_rate: float = Field(
-        default=5e-5, ge=0, description="Learning rate of the model"
+        default=3e-5, ge=0, description="Learning rate of the model"
     )
     lora_rank: int = Field(
         default=8, description="Rank of the LoRA decomposition matrix", ge=2
