@@ -54,6 +54,7 @@ def finetune(dataset_dir: str):
         enable_checkpointing=finetuning_config.enable_checkpointing,
         default_root_dir=finetuning_config.model_checkpoint_path,
         max_epochs=finetuning_config.max_epochs,
+        accumulate_grad_batches=finetuning_config.accumulate_grad_batches,
     )
 
     logger.info("Starting model finetuning...")

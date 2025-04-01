@@ -20,12 +20,12 @@ class DatasetConfig(BaseModel):
         description="Path to the dataset directory",
     )
     train_batch_size: int = Field(
-        default=64,
+        default=32,
         ge=4,
         description="Batch size for training",
     )
     val_batch_size: int = Field(
-        default=4,
+        default=2,
         description="Batch size for validation",
     )
     test_batch_size: int = Field(
@@ -132,6 +132,11 @@ class FinetuningConfig(BaseModel):
     devices: T.List[int] = Field(
         default=[0],
         description="GPU devices to use for training",
+    )
+    accumulate_grad_batches: int = Field(
+        default=2,
+        ge=1,
+        description="Number of batches to accumulate gradients before updating the model",
     )
 
 
