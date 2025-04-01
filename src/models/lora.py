@@ -33,7 +33,7 @@ class RSLoRALayer(torch.nn.Module):
         self.rank = rank
 
     def forward(self, x):
-        x = (self.alpha / (self.rank**2)) * (x @ self.A @ self.B)
+        x = (self.alpha / (self.rank**0.5)) * (x @ self.A @ self.B)
         return x
 
 
