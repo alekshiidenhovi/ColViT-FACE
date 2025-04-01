@@ -87,10 +87,10 @@ class ModelConfig(BaseModel):
         default=3e-5, ge=0, description="Learning rate of the model"
     )
     lora_rank: int = Field(
-        default=8, description="Rank of the LoRA decomposition matrix", ge=2
+        default=16, description="Rank of the LoRA decomposition matrix", ge=2
     )
     lora_alpha: int = Field(
-        default=8, description="Scaling factor for the LoRA decomposition matrix", ge=1
+        default=4, description="Scaling factor for the LoRA decomposition matrix", ge=1
     )
 
 
