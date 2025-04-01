@@ -1,7 +1,7 @@
 import wandb
 import os
 from dotenv import load_dotenv
-from pytorch_lightning.loggers import WandbLogger
+from lightning.pytorch.loggers import WandbLogger
 
 
 def init_wandb_logger():

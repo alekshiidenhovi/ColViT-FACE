@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-import pytorch_lightning as pl
+import lightning as L
 from models.vit_encoder import VitEncoder
 from models.utils import compute_similarity_scores
 from models.lora import LinearWithRSLoRA
@@ -8,7 +8,7 @@ from common.config import ModelConfig
 from common.metrics import recall_at_k
 
 
-class ColViT(pl.LightningModule):
+class ColViT(L.LightningModule):
     def __init__(self, model_config: ModelConfig):
         super().__init__()
         self.encoder = VitEncoder(

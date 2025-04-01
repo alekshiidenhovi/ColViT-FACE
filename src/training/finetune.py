@@ -8,7 +8,7 @@ from common.logger import logger
 from common.wandb_logger import init_wandb_logger
 from common.parameters import count_parameters
 from datasets.casia_webface.data_module import CASIAFaceDataModule
-from pytorch_lightning import Trainer, seed_everything
+from lightning.pytorch import Trainer, seed_everything
 
 
 @click.command()

@@ -1,4 +1,4 @@
-import pytorch_lightning as pl
+import lightning as L
 import os
 import random
 from torchvision import transforms
@@ -7,7 +7,7 @@ from datasets.casia_webface.dataset import CASIAFaceDataset
 from common.config import DatasetConfig
 
 
-class CASIAFaceDataModule(pl.LightningDataModule):
+class CASIAFaceDataModule(L.LightningDataModule):
     def __init__(
         self,
         dataset_config: DatasetConfig,
