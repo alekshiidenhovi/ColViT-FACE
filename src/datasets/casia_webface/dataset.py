@@ -7,7 +7,6 @@ from PIL import Image
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from common.logger import logger
-from common.types import TRAINING_SAMPLE
 
 
 class CASIAFaceDataset(Dataset):
@@ -54,7 +53,7 @@ class CASIAFaceDataset(Dataset):
     def __len__(self):
         return len(self.image_paths)
 
-    def __getitem__(self, idx: int) -> TRAINING_SAMPLE:
+    def __getitem__(self, idx: int):
         """Get an image with its negative samples.
 
         Parameters
@@ -109,12 +108,6 @@ class CASIAFaceDataset(Dataset):
         negative_imgs = [
             self.transform(Image.open(p).convert("RGB")) for p in negative_image_paths
         ]
-
-        return (
-            query_image,
-            positive_image,
-            negative_imgs,
-            query_image_path,
-            positive_image_path,
-            negative_image_paths,
-        )
+        images = torch.stack([query_image, positive_image, *negative_imgs])
+        image_paths = [query_image_path, positive_image_path, *negative_image_paths]
+        return (images, image_paths)
