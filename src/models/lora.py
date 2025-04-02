@@ -32,8 +32,8 @@ class RSLoRALayer(torch.nn.Module):
         self.alpha = alpha
         self.rank = rank
 
-    def forward(self, x):
-        x = (self.alpha / (self.rank**0.5)) * (x @ self.A @ self.B)
+    def forward(self, x: torch.Tensor):
+        x = (self.alpha / (self.rank**0.5)) * self.B(self.A(x))
         return x
 
 
@@ -59,5 +59,5 @@ class LinearWithRSLoRA(torch.nn.Module):
         self.linear = linear
         self.lora = RSLoRALayer(linear.in_features, linear.out_features, rank, alpha)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         return self.linear(x) + self.lora(x)
