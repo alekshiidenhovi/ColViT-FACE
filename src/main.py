@@ -1,7 +1,8 @@
 from urllib.request import urlopen
 from PIL import Image, ImageFile
-from models.colvit import ColViT
-from common.config import TrainingConfig
+from models.vit_encoder import VitEncoder
+from transformers import ViTModel
+from common.config import ModelConfig
 
 if __name__ == "__main__":
     img: ImageFile.ImageFile = Image.open(
@@ -9,18 +10,19 @@ if __name__ == "__main__":
             url="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/beignets-task-guide.png"
         )
     )
-    model_name = "vit_small_patch16_384.augreg_in21k_ft_in1k"
+    model_name = "google/vit-base-patch16-224"
     new_token_dim = 256
-    config = TrainingConfig(
-        dataset_dir="/teamspace/studios/this_studio/ColViT-FACE/data/casia-webface/"
+    model_config = ModelConfig(
+        pretrained_vit_name=model_name, token_embedding_dim=new_token_dim
     )
-    colvit = ColViT(config)
+    base_model = ViTModel.from_pretrained(model_config.pretrained_vit_name)
+    model = VitEncoder(base_model, model_config)
 
     trainable_params = []
     total_params = 0
     trainable_param_count = 0
 
-    for name, param in colvit.encoder.named_parameters():
+    for name, param in model.encoder.named_parameters():
         total_params += param.numel()
         if param.requires_grad:
             trainable_params.append(name)
