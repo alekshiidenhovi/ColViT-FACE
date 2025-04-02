@@ -1,6 +1,7 @@
 import click
 import time
 import torch
+from tqdm import tqdm
 from accelerate import Accelerator
 from common.config import TrainingConfig
 from common.nvidia import get_gpu_info_from_nvidia_smi
@@ -234,7 +235,13 @@ def finetune(**kwargs):
         logger.info(f"Starting epoch {epoch + 1} of {finetuning_config.max_epochs}")
         total_train_loss = 0
 
-        for batch in train_dataloader:
+        train_progress_bar = tqdm(
+            train_dataloader,
+            desc=f"Epoch {epoch + 1}/{finetuning_config.max_epochs}",
+            leave=True,
+        )
+
+        for batch in train_progress_bar:
             with accelerator.accumulate(model):
                 with accelerator.autocast():
                     scores = compute_similarity_scores(batch, model)
@@ -254,9 +261,12 @@ def finetune(**kwargs):
                 wandb_logger.log_metrics(
                     {f"train_recall_at_{recall_value}": recall, "epoch": epoch}
                 )
+
             global_step += 1
+            train_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
 
             if global_step % finetuning_config.val_check_interval == 0:
+                train_progress_bar.set_postfix({"status": "Running validation..."})
                 val_metrics = validate(
                     model=model,
                     accelerator=accelerator,
@@ -273,6 +283,12 @@ def finetune(**kwargs):
                     enable_checkpointing=finetuning_config.enable_checkpointing,
                     val_metrics=val_metrics,
                     best_val_loss=best_val_loss,
+                )
+                train_progress_bar.set_postfix(
+                    {
+                        "train_loss": f"{loss.item():.4f}",
+                        "val_loss": f"{val_metrics['val_loss']:.4f}",
+                    }
                 )
 
         wandb_logger.log_metrics(
