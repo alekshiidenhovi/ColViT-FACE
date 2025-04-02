@@ -25,15 +25,17 @@ class DatasetConfig(BaseModel):
     )
     train_batch_size: int = Field(
         default=64,
-        ge=4,
+        ge=1,
         description="Batch size for training",
     )
     val_batch_size: int = Field(
         default=2,
+        ge=1,
         description="Batch size for validation",
     )
     test_batch_size: int = Field(
         default=1,
+        ge=1,
         description="Batch size for testing",
     )
     num_workers: int = Field(
@@ -43,6 +45,7 @@ class DatasetConfig(BaseModel):
     )
     img_size: int = Field(
         default=384,
+        ge=32,
         description="Size of the input images",
     )
     train_val_test_split: T.Tuple[float, float, float] = Field(
@@ -51,14 +54,17 @@ class DatasetConfig(BaseModel):
     )
     train_num_negative_samples: int = Field(
         default=1,
+        ge=1,
         description="Number of negative samples to return per anchor image during training",
     )
     val_num_negative_samples: int = Field(
         default=63,
+        ge=1,
         description="Number of negative samples to return per anchor image during validation",
     )
     test_num_negative_samples: int = Field(
         default=1000,
+        ge=1,
         description="Number of negative samples to return per anchor image during testing",
     )
 
@@ -93,7 +99,7 @@ class ModelConfig(BaseModel):
         default=16, description="Rank of the LoRA decomposition matrix", ge=2
     )
     lora_alpha: int = Field(
-        default=8, description="Scaling factor for the LoRA decomposition matrix", ge=1
+        default=4, description="Scaling factor for the LoRA decomposition matrix", ge=1
     )
 
 
@@ -113,7 +119,7 @@ class FinetuningConfig(BaseModel):
     )
     val_check_interval: int = Field(
         default=100,
-        ge=10,
+        ge=1,
         description="The interval of training batched to run validation",
     )
     limit_val_batches: int = Field(
