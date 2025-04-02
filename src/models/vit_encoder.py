@@ -1,4 +1,4 @@
-from transformers import ViTModel, ViTConfig, ViTPreTrainedModel
+from transformers import ViTConfig, ViTPreTrainedModel, ViTModel
 from common.config import ModelConfig
 import torch
 import typing as T
@@ -25,15 +25,20 @@ class VitEncoder(ViTPreTrainedModel):
     dim_reduction : torch.nn.Linear
         Linear layer that reduces the token embedding dimension
     """
+    base_model: ViTModel
 
     def __init__(
         self,
-        config: ViTConfig,
+        vit_config: ViTConfig,
         model_config: ModelConfig,
         quantization_config: T.Optional[BitsAndBytesConfig] = None,
     ):
-        super().__init__(config)
-        self.base_model = ViTModel(config, quantization_config=quantization_config)
+        super().__init__(vit_config)
+        self.base_model = ViTModel.from_pretrained(
+            model_config.pretrained_vit_name,
+            config=vit_config,
+            quantization_config=quantization_config,
+        )
         hidden_dim = self.base_model.config.hidden_size
 
         self.dim_reduction = torch.nn.Linear(

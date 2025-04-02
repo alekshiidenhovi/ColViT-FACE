@@ -9,12 +9,16 @@ from common.config import ModelConfig
 class VitEncoderWithLoRA(ViTPreTrainedModel):
     def __init__(
         self,
-        config: ViTConfig,
+        vit_config: ViTConfig,
         model_config: ModelConfig,
         quantization_config: T.Optional[BitsAndBytesConfig] = None,
     ):
-        super().__init__(config)
-        self.encoder = VitEncoder(config, model_config)
+        super().__init__(vit_config)
+        self.encoder = VitEncoder(
+            vit_config=vit_config,
+            model_config=model_config,
+            quantization_config=quantization_config,
+        )
         for param in self.encoder.parameters():
             param.requires_grad = False
 
