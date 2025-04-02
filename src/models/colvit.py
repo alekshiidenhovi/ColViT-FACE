@@ -52,37 +52,36 @@ class ColViT(L.LightningModule):
         scores = compute_similarity_scores(batch, self.encoder)
         targets = torch.zeros(scores.size(0), dtype=torch.int64, device=self.device)
         loss = F.cross_entropy(scores, targets)
-        recall_at_1 = recall_at_k(scores, 1)
         self.log("train_loss", loss)
-        self.log("train_recall_at_1", recall_at_1)
+
+        recall_values = [1, 3, 10]
+        for recall_value in recall_values:
+            recall = recall_at_k(scores, recall_value)
+            self.log(f"train_recall_at_{recall_value}", recall)
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx):
         scores = compute_similarity_scores(batch, self.encoder)
         targets = torch.zeros(scores.size(0), dtype=torch.int64, device=self.device)
         loss = F.cross_entropy(scores, targets)
-        recall_at_1 = recall_at_k(scores, 1)
-        recall_at_3 = recall_at_k(scores, 3)
-        recall_at_10 = recall_at_k(scores, 10)
         self.log("val_loss", loss)
-        self.log("val_recall_at_1", recall_at_1)
-        self.log("val_recall_at_3", recall_at_3)
-        self.log("val_recall_at_10", recall_at_10)
+
+        recall_values = [1, 3, 10]
+        for recall_value in recall_values:
+            recall = recall_at_k(scores, recall_value)
+            self.log(f"val_recall_at_{recall_value}", recall)
         return loss
 
     def testing_step(self, batch: torch.Tensor, batch_idx):
         scores = compute_similarity_scores(batch, self.encoder)
         targets = torch.zeros(scores.size(0), dtype=torch.int64, device=self.device)
         loss = F.cross_entropy(scores, targets)
-        recall_at_1 = recall_at_k(scores, 1)
-        recall_at_3 = recall_at_k(scores, 3)
-        recall_at_10 = recall_at_k(scores, 10)
-        recall_at_100 = recall_at_k(scores, 100)
         self.log("test_loss", loss)
-        self.log("test_recall_at_1", recall_at_1)
-        self.log("test_recall_at_3", recall_at_3)
-        self.log("test_recall_at_10", recall_at_10)
-        self.log("test_recall_at_100", recall_at_100)
+
+        recall_values = [1, 3, 10, 100]
+        for recall_value in recall_values:
+            recall = recall_at_k(scores, recall_value)
+            self.log(f"test_recall_at_{recall_value}", recall)
         return loss
 
     def configure_optimizers(self):
