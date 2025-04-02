@@ -1,6 +1,7 @@
 import os
 import typing as T
 import random
+import torch
 from collections import defaultdict
 from PIL import Image
 from torch.utils.data import Dataset
@@ -98,7 +99,7 @@ class CASIAFaceDataset(Dataset):
 
         image_paths = [query_image_path, positive_image_path, *negative_image_paths]
 
-        images = [Image.open(p).convert("RGB") for p in image_paths]
+        images = torch.cat([Image.open(p).convert("RGB") for p in image_paths])
         images = self.processor(images=images, return_tensors="pt")
 
         return (images, image_paths)
