@@ -5,11 +5,12 @@ from einops import repeat, rearrange
 
 
 def compute_similarity_scores(batch: torch.Tensor, encoder: torch.nn.Module):
-    all_images, _ = batch
+    feature_dict, _ = batch
+    all_images = feature_dict["pixel_values"]
     batch_size, num_images = all_images.shape[:2]
     all_images_flat = rearrange(
         all_images,
-        "batch_size num_images height width channel -> (batch_size num_images) height width channel",
+        "batch_size num_images channel height width -> (batch_size num_images) channel height width",
     )
     all_reprs = encoder(
         all_images_flat
