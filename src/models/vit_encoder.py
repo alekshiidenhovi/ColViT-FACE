@@ -77,6 +77,7 @@ class VitEncoder(ViTModel):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
         )
-        sequence_output = self.layernorm(encoder_outputs.last_hidden_state)
+        print("encoder_outputs", encoder_outputs)
+        sequence_output = self.layernorm(encoder_outputs)
         output_tokens = self.dim_reduction(sequence_output)
         return output_tokens
