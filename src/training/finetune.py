@@ -233,8 +233,8 @@ def finetune(**kwargs):
         total_train_loss = 0
 
         for batch in train_dataloader:
-            with accelerator.autocast():
-                with accelerator.accumulate(model):
+            with accelerator.accumulate(model):
+                with accelerator.autocast():
                     scores = compute_similarity_scores(batch, model)
                     targets = torch.zeros(
                         scores.size(0), dtype=torch.int64, device=accelerator.device
