@@ -32,7 +32,7 @@ class VitEncoder(ViTModel):
     """
 
     def __init__(self, config: ExtendedViTConfig):
-        super().__init__(config)
+        super().__init__(config, add_pooling_layer=False)
         hidden_dim = self.config.hidden_size
 
         self.dim_reduction = torch.nn.Linear(hidden_dim, config.reduced_dim)
@@ -65,6 +65,18 @@ class VitEncoder(ViTModel):
         output_hidden_states : bool, optional
             Whether to return hidden states
         """
-        outputs = self(pixel_values).last_hidden_state
-        output_tokens = self.dim_reduction(outputs)
+        embedding_output = self.embeddings(
+            pixel_values=pixel_values,
+            bool_masked_pos=bool_masked_pos,
+            interpolate_pos_encoding=interpolate_pos_encoding,
+        )
+        encoder_outputs = self.encoder(
+            embedding_output,
+            head_mask=head_mask,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict,
+        )
+        sequence_output = self.layernorm(encoder_outputs.last_hidden_state)
+        output_tokens = self.dim_reduction(sequence_output)
         return output_tokens
