@@ -18,6 +18,8 @@ attrs==25.3.0
     # via aiohttp
 backoff==2.2.1
     # via lightning-sdk
+bitsandbytes==0.45.4
+    # via -r requirements.in
 certifi==2025.1.31
     # via
     #   requests
@@ -144,6 +146,7 @@ networkx==3.4.2
 numpy==2.2.4
     # via
     #   accelerate
+    #   bitsandbytes
     #   contourpy
     #   faiss-cpu
     #   matplotlib
@@ -250,7 +253,7 @@ pyjwt==2.10.1
 pyparsing==3.2.3
     # via matplotlib
 pytest==8.3.5
-    # via -r requirements.in
+    # via -r requirements-dev.in
 python-dateutil==2.9.0.post0
     # via
     #   jupyter-client
@@ -324,6 +327,7 @@ tokenizers==0.21.1
 torch==2.6.0
     # via
     #   accelerate
+    #   bitsandbytes
     #   lightning
     #   pytorch-lightning
     #   timm
