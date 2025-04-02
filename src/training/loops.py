@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from common.metrics import recall_at_k
 from models.utils import compute_similarity_scores
 from pydantic import BaseModel, Field
+from tqdm import tqdm
 
 
 class ValidationMetrics(BaseModel):
@@ -30,9 +31,19 @@ def validate(
     model.eval()
     all_scores = []
     prefix = "test" if is_test else "val"
+    desc = "Testing" if is_test else "Validating"
+
+    progress_bar = tqdm(
+        dataloader,
+        desc=desc,
+        leave=False,
+        total=min(limit_batches, len(dataloader))
+        if limit_batches is not None
+        else None,
+    )
 
     with torch.no_grad():
-        for batch_idx, batch in enumerate(dataloader):
+        for batch_idx, batch in enumerate(progress_bar):
             if limit_batches is not None and batch_idx >= limit_batches:
                 break
 
