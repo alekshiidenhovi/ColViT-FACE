@@ -25,8 +25,6 @@ class VitEncoder(ViTPreTrainedModel):
     dim_reduction : torch.nn.Linear
         Linear layer that reduces the token embedding dimension
     """
-    base_model: ViTModel
-
     def __init__(
         self,
         vit_config: ViTConfig,
