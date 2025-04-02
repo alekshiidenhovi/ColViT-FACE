@@ -22,6 +22,7 @@ class VitEncoderWithLoRA(ViTPreTrainedModel):
         for param in self.encoder.parameters():
             param.requires_grad = False
 
+        print(self.encoder.base_model)
         for block in self.encoder.base_model.encoder.layer:
             block.attention.attention.query = LinearWithRSLoRA(
                 block.attention.attention.query,
