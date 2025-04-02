@@ -10,10 +10,15 @@ from common.wandb_logger import init_wandb_logger
 from common.parameters import count_parameters
 from common.metrics import recall_at_k
 from datasets.casia_webface.dataloader import retrieve_dataloaders
-from models.vit_encoder_with_lora import VitEncoderWithLoRA
+from models.vit_encoder import VitEncoder, ExtendedViTConfig
 from models.utils import compute_similarity_scores
 from training.loops import validate, save_best_model
-from transformers import ViTImageProcessorFast, BitsAndBytesConfig, AutoConfig
+from transformers import (
+    ViTImageProcessorFast,
+    BitsAndBytesConfig,
+    AutoConfig,
+    ViTConfig,
+)
 
 
 @click.command()
@@ -180,13 +185,15 @@ def finetune(**kwargs):
     )
 
     logger.info("Initializing model and data modules...")
-    vit_config = AutoConfig.from_pretrained(model_config.pretrained_vit_name)
+    vit_config: ViTConfig = AutoConfig.from_pretrained(model_config.pretrained_vit_name)
+    extended_vit_config = ExtendedViTConfig(model_config=model_config, **vit_config)
     processor = ViTImageProcessorFast.from_pretrained(model_config.pretrained_vit_name)
-    model = VitEncoderWithLoRA(
-        vit_config=vit_config,
-        model_config=model_config,
+    model = VitEncoder.from_pretrained(
+        model_config.pretrained_vit_name,
+        vit_config=extended_vit_config,
         quantization_config=quantization_config,
     )
+    print(model)
     train_dataloader, val_dataloader, test_dataloader = retrieve_dataloaders(
         processor, dataset_config
     )

@@ -1,12 +1,17 @@
-from transformers import ViTConfig, ViTPreTrainedModel, ViTModel
+from transformers import ViTConfig, ViTModel
 from common.config import ModelConfig
 import torch
 import typing as T
 import math
-from transformers import BitsAndBytesConfig
 
 
-class VitEncoder(ViTPreTrainedModel):
+class ExtendedViTConfig(ViTConfig):
+    def __init__(self, model_config: ModelConfig, **kwargs):
+        super().__init__(**kwargs)
+        self.reduced_dim: int = model_config.token_embedding_dim
+
+
+class VitEncoder(ViTModel):
     """Vision Transformer (ViT) encoder with dimensionality reduction.
 
     This class wraps a pretrained ViT model and adds a linear projection layer to reduce the dimensionality of the output token embeddings
@@ -25,24 +30,13 @@ class VitEncoder(ViTPreTrainedModel):
     dim_reduction : torch.nn.Linear
         Linear layer that reduces the token embedding dimension
     """
-    def __init__(
-        self,
-        vit_config: ViTConfig,
-        model_config: ModelConfig,
-        quantization_config: T.Optional[BitsAndBytesConfig] = None,
-    ):
-        super().__init__(vit_config)
-        self.base_model = ViTModel.from_pretrained(
-            model_config.pretrained_vit_name,
-            config=vit_config,
-            quantization_config=quantization_config,
-        )
-        hidden_dim = self.base_model.config.hidden_size
 
-        self.dim_reduction = torch.nn.Linear(
-            hidden_dim, model_config.token_embedding_dim
-        )
-        std_dev = 1 / math.sqrt(model_config.token_embedding_dim)
+    def __init__(self, config: ExtendedViTConfig):
+        super().__init__(config)
+        hidden_dim = self.config.hidden_size
+
+        self.dim_reduction = torch.nn.Linear(hidden_dim, config.reduced_dim)
+        std_dev = 1 / math.sqrt(config.reduced_dim)
         self.dim_reduction.weight.data.normal_(0, std_dev)
         self.dim_reduction.bias.data.zero_()
 
@@ -71,6 +65,6 @@ class VitEncoder(ViTPreTrainedModel):
         output_hidden_states : bool, optional
             Whether to return hidden states
         """
-        outputs = self.base_model(pixel_values).last_hidden_state
+        outputs = self(pixel_values).last_hidden_state
         output_tokens = self.dim_reduction(outputs)
         return output_tokens
