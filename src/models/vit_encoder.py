@@ -14,8 +14,8 @@ class VitEncoder(torch.nn.Module):
         self.model = vit_model
         hidden_dim = self.model.config.hidden_size
 
-        self.dim_reduction = torch.nn.Linear(hidden_dim, model_config.reduced_dim)
-        std_dev = 1 / math.sqrt(model_config.reduced_dim)
+        self.dim_reduction = torch.nn.Linear(hidden_dim, model_config.token_embedding_dim)
+        std_dev = 1 / math.sqrt(model_config.token_embedding_dim)
         self.dim_reduction.weight.data.normal_(0, std_dev)
         self.dim_reduction.bias.data.zero_()
 
