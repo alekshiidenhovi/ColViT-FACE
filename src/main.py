@@ -22,7 +22,7 @@ if __name__ == "__main__":
     total_params = 0
     trainable_param_count = 0
 
-    for name, param in model.encoder.named_parameters():
+    for name, param in model.named_parameters():
         total_params += param.numel()
         if param.requires_grad:
             trainable_params.append(name)

@@ -11,8 +11,8 @@ class VitEncoder(torch.nn.Module):
         model_config: ModelConfig,
     ):
         super().__init__()
-        self.model = vit_model
-        hidden_dim = self.model.config.hidden_size
+        self.base_model = vit_model
+        hidden_dim = self.base_model.config.hidden_size
 
         self.dim_reduction = torch.nn.Linear(hidden_dim, model_config.token_embedding_dim)
         std_dev = 1 / math.sqrt(model_config.token_embedding_dim)
@@ -20,6 +20,6 @@ class VitEncoder(torch.nn.Module):
         self.dim_reduction.bias.data.zero_()
 
     def forward(self, input_tokens: torch.Tensor):
-        outputs = self.model(input_tokens).last_hidden_state
+        outputs = self.base_model(input_tokens).last_hidden_state
         output_tokens = self.dim_reduction(outputs)
         return output_tokens
