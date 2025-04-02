@@ -1,16 +1,13 @@
 from pydantic import BaseModel, Field, field_validator
 import typing as T
 import multiprocessing
+from accelerate.utils.dataclasses import PrecisionType
 
 BASE_MODEL = T.Literal[
     "vit_small_patch16_384.augreg_in21k_ft_in1k",
     "vit_base_patch8_224.augreg2_in21k_ft_in1k",
 ]
 ACCELERATOR = T.Literal["gpu", "cpu", "tpu"]
-PRECISION = T.Literal[
-    "bf16-mixed",
-    "32",
-]
 
 
 class DatasetConfig(BaseModel):
@@ -122,13 +119,16 @@ class FinetuningConfig(BaseModel):
     limit_val_batches: int = Field(
         default=50, description="Number of validation batches to run", ge=1
     )
-    precision: PRECISION = Field(
-        default="bf16-mixed",
+    precision: PrecisionType = Field(
+        default=PrecisionType.BF16,
         description="Precision of gradients and the model used during finetuning",
     )
     model_checkpoint_path: str = Field(
         default="./.checkpoints/",
         description="Folder for saving model checkpoints during training",
+    )
+    final_model_path: str = Field(
+        default="./.checkpoints/final_model/",
     )
     max_epochs: int = Field(
         default=8,
@@ -143,6 +143,10 @@ class FinetuningConfig(BaseModel):
         default=1,
         ge=1,
         description="Number of batches to accumulate gradients before updating the model",
+    )
+    gradient_checkpointing: bool = Field(
+        default=True,
+        description="Enables gradient checkpointing for memory efficient training",
     )
 
 

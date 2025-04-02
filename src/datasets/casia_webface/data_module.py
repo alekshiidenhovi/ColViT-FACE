@@ -1,7 +1,7 @@
 import lightning as L
 import os
 import random
-from torchvision import transforms
+from transformers import ViTImageProcessorFast
 from torch.utils.data import DataLoader
 from datasets.casia_webface.dataset import CASIAFaceDataset
 from common.config import DatasetConfig
@@ -20,6 +20,9 @@ class CASIAFaceDataModule(L.LightningDataModule):
         """
         super().__init__()
         self.dataset_config = dataset_config
+        self.processor = ViTImageProcessorFast.from_pretrained(
+            self.dataset_config.pretrained_vit_name
+        )
 
     def setup(self, stage=None):
         identity_folders = [
@@ -38,31 +41,22 @@ class CASIAFaceDataModule(L.LightningDataModule):
         val_identities = identity_folders[train_size : train_size + val_size]
         test_identities = identity_folders[train_size + val_size :]
 
-        self.transform = transforms.Compose(
-            [
-                transforms.Resize(
-                    (self.dataset_config.img_size, self.dataset_config.img_size)
-                ),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5] * 3, std=[0.5] * 3),
-            ]
-        )
         self.train_dataset = CASIAFaceDataset(
             self.dataset_config.dataset_dir,
             identities=train_identities,
-            transform=self.transform,
+            processor=self.processor,
             num_negative_samples=self.dataset_config.train_num_negative_samples,
         )
         self.val_dataset = CASIAFaceDataset(
             self.dataset_config.dataset_dir,
             identities=val_identities,
-            transform=self.transform,
+            processor=self.processor,
             num_negative_samples=self.dataset_config.val_num_negative_samples,
         )
         self.test_dataset = CASIAFaceDataset(
             self.dataset_config.dataset_dir,
             identities=test_identities,
-            transform=self.transform,
+            processor=self.processor,
             num_negative_samples=self.dataset_config.test_num_negative_samples,
         )
 

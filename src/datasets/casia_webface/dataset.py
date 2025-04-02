@@ -1,12 +1,11 @@
 import os
 import typing as T
 import random
-import torch
 from collections import defaultdict
 from PIL import Image
 from torch.utils.data import Dataset
-import torchvision.transforms as transforms
 from common.logger import logger
+from transformers import ViTImageProcessorFast
 
 
 class CASIAFaceDataset(Dataset):
@@ -14,7 +13,7 @@ class CASIAFaceDataset(Dataset):
         self,
         dir_path: str,
         identities: T.List[str],
-        transform: transforms.Compose,
+        processor: ViTImageProcessorFast,
         num_negative_samples: int,
     ):
         """Initialize the FaceTripletDataset.
@@ -32,7 +31,7 @@ class CASIAFaceDataset(Dataset):
 
         """
         self.dir_path = dir_path
-        self.transform = transform
+        self.processor = processor
         self.identity_to_image_paths: T.Dict[str, T.List[str]] = defaultdict(list)
         self.image_paths: T.List[str] = []
         self.image_identities: T.List[str] = []
@@ -71,9 +70,7 @@ class CASIAFaceDataset(Dataset):
         """
         query_image_path = self.image_paths[idx]
         identity = self.image_identities[idx]
-        other_identities = [
-            id for id in self.identity_to_image_paths.keys() if id != identity
-        ]
+        other_identities = [id for id in self.image_identities if id != identity]
 
         nof_other_identity_images = 0
         for identity in other_identities:
@@ -99,15 +96,9 @@ class CASIAFaceDataset(Dataset):
                 negative_image_paths.append(neg_path)
                 used_paths.add(neg_path)
 
-        query_image: torch.Tensor = self.transform(
-            Image.open(query_image_path).convert("RGB")
-        )
-        positive_image: torch.Tensor = self.transform(
-            Image.open(positive_image_path).convert("RGB")
-        )
-        negative_imgs = [
-            self.transform(Image.open(p).convert("RGB")) for p in negative_image_paths
-        ]
-        images = torch.stack([query_image, positive_image, *negative_imgs])
         image_paths = [query_image_path, positive_image_path, *negative_image_paths]
+
+        images = [Image.open(p).convert("RGB") for p in image_paths]
+        images = self.processor(images=images, return_tensors="pt")
+
         return (images, image_paths)

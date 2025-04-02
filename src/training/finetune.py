@@ -1,14 +1,19 @@
 import click
 import time
-
-from models.colvit import ColViT
+import torch
+from accelerate import Accelerator
 from common.config import TrainingConfig
 from common.nvidia import get_gpu_info_from_nvidia_smi
 from common.logger import logger
+from common.optimizer import get_adam8bit_optimizer
 from common.wandb_logger import init_wandb_logger
 from common.parameters import count_parameters
-from datasets.casia_webface.data_module import CASIAFaceDataModule
-from lightning.pytorch import Trainer, seed_everything
+from common.metrics import recall_at_k
+from datasets.casia_webface.dataloader import retrieve_dataloaders
+from models.vit_encoder_with_lora import VitEncoderWithLoRA
+from models.utils import compute_similarity_scores
+from training.loops import validate, save_best_model
+from transformers import ViTImageProcessorFast, ViTModel, BitsAndBytesConfig
 
 
 @click.command()
@@ -167,11 +172,26 @@ def finetune(**kwargs):
     dataset_config = training_config.get_dataset_config()
     finetuning_config = training_config.get_finetuning_config()
     optimizer_config = training_config.get_optimizer_config()
-    seed_everything(training_config.seed)
+    quantization_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_compute_dtype=torch.bfloat16,
+    )
 
     logger.info("Initializing model and data modules...")
-    model = ColViT(model_config, optimizer_config)
-    datamodule = CASIAFaceDataModule(dataset_config)
+    base_model = ViTModel.from_pretrained(
+        dataset_config.pretrained_vit_name, quantization_config=quantization_config
+    )
+    processor = ViTImageProcessorFast.from_pretrained(
+        dataset_config.pretrained_vit_name
+    )
+    model = VitEncoderWithLoRA(base_model, model_config)
+    train_dataloader, val_dataloader, test_dataloader = retrieve_dataloaders(
+        processor, dataset_config
+    )
+    optimizer = get_adam8bit_optimizer(model, optimizer_config)
+
     gpu_info = get_gpu_info_from_nvidia_smi()
 
     logger.info("Logging training configs and GPU info to W&B...")
@@ -183,22 +203,91 @@ def finetune(**kwargs):
     )
     wandb_logger.watch(model)
 
-    logger.info("Initializing Lightning Trainer...")
-    trainer = Trainer(
-        logger=wandb_logger,
-        devices=finetuning_config.devices,
-        accelerator=finetuning_config.accelerator,
-        precision=finetuning_config.precision,
-        val_check_interval=finetuning_config.val_check_interval,
-        limit_val_batches=finetuning_config.limit_val_batches,
-        enable_checkpointing=finetuning_config.enable_checkpointing,
-        default_root_dir=finetuning_config.model_checkpoint_path,
-        max_epochs=finetuning_config.max_epochs,
-        accumulate_grad_batches=finetuning_config.accumulate_grad_batches,
+    if finetuning_config.gradient_checkpointing:
+        model.gradient_checkpointing_enable()
+
+    accelerator = Accelerator(
+        mixed_precision=finetuning_config.precision.value,
+        gradient_accumulation_steps=finetuning_config.accumulate_grad_batches,
+    )
+    model, optimizer, train_dataloader, val_dataloader, test_dataloader = (
+        accelerator.prepare(
+            model, optimizer, train_dataloader, val_dataloader, test_dataloader
+        )
     )
 
+    global_step = 0
+    best_val_loss = 0.0
+    model.train()
+
     logger.info("Starting model finetuning...")
-    trainer.fit(model, datamodule=datamodule)
+    for epoch in range(finetuning_config.max_epochs):
+        logger.info(f"Starting epoch {epoch + 1} of {finetuning_config.max_epochs}")
+        total_train_loss = 0
+
+        for batch in train_dataloader:
+            with accelerator.autocast():
+                with accelerator.accumulate(model):
+                    scores = compute_similarity_scores(batch, model)
+                    targets = torch.zeros(
+                        scores.size(0), dtype=torch.int64, device=accelerator.device
+                    )
+                    loss = torch.nn.functional.cross_entropy(scores, targets)
+                    total_train_loss += loss.item()
+                    accelerator.backward(loss)
+                    optimizer.step()
+                    optimizer.zero_grad()
+
+            wandb_logger.log_metrics({"train_loss": loss.item(), "epoch": epoch})
+            recall_values = [1, 3, 10]
+            for recall_value in recall_values:
+                recall = recall_at_k(scores, recall_value)
+                wandb_logger.log_metrics(
+                    {f"train_recall_at_{recall_value}": recall, "epoch": epoch}
+                )
+            global_step += 1
+
+            if global_step % finetuning_config.val_check_interval == 0:
+                val_metrics = validate(
+                    model=model,
+                    accelerator=accelerator,
+                    dataloader=val_dataloader,
+                    wandd_logger=wandb_logger,
+                    limit_batches=finetuning_config.val_check_interval,
+                    is_test=False,
+                )
+                save_best_model(
+                    accelerator=accelerator,
+                    epoch=epoch,
+                    logger=logger,
+                    model_checkpoint_path=finetuning_config.model_checkpoint_path,
+                    enable_checkpointing=finetuning_config.enable_checkpointing,
+                    val_metrics=val_metrics,
+                    best_val_loss=best_val_loss,
+                )
+
+        wandb_logger.log_metrics(
+            {
+                "train_epoch_loss": total_train_loss / len(train_dataloader),
+                "epoch": epoch,
+            }
+        )
+        logger.info(f"Running validation for epoch {epoch + 1}")
+        val_metrics = validate(
+            model,
+            val_dataloader,
+            accelerator,
+            wandb_logger,
+            limit_batches=finetuning_config.limit_val_batches,
+            is_test=False,
+        )
+
+    logger.info("Running final evaluation on test set...")
+    test_metrics = validate(
+        model, test_dataloader, accelerator, wandb_logger, is_test=True
+    )
+    logger.info(f"Test metrics: {test_metrics}")
+
     end_time = time.time()
     logger.info(f"Finished finetuning in {end_time - start_time:.2f} seconds")
 
