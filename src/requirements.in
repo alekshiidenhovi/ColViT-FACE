@@ -6,6 +6,7 @@ kagglehub==0.3.10
 lightning==2.5.1
 lightning_sdk==0.2.3
 matplotlib==3.10.1
+peft==0.15.1
 pydantic==2.10.6
 python-dotenv==1.1.0
 timm==1.0.15
