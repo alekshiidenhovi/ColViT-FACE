@@ -1,6 +1,7 @@
 import os
 import torch
 import wandb
+import wandb.wandb_run
 import logging
 import typing as T
 from accelerate import Accelerator
