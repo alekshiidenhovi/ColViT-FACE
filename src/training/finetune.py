@@ -190,7 +190,7 @@ def finetune(**kwargs):
     processor = ViTImageProcessorFast.from_pretrained(model_config.pretrained_vit_name)
     model = VitEncoder.from_pretrained(
         model_config.pretrained_vit_name,
-        vit_config=extended_vit_config,
+        config=extended_vit_config,
         quantization_config=quantization_config,
     )
     print(model)
