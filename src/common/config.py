@@ -3,10 +3,7 @@ import typing as T
 import multiprocessing
 from accelerate.utils.dataclasses import PrecisionType
 
-BASE_MODEL = T.Literal[
-    "vit_small_patch16_384.augreg_in21k_ft_in1k",
-    "vit_base_patch8_224.augreg2_in21k_ft_in1k",
-]
+BASE_MODEL = T.Literal["google/vit-base-patch16-224"]
 ACCELERATOR = T.Literal["gpu", "cpu", "tpu"]
 
 
@@ -83,7 +80,7 @@ class ModelConfig(BaseModel):
     """
 
     pretrained_vit_name: BASE_MODEL = Field(
-        default="vit_small_patch16_384.augreg_in21k_ft_in1k",
+        default="google/vit-base-patch16-224",
         description="Name of the pretrained vision transformer to use",
     )
     token_embedding_dim: int = Field(
