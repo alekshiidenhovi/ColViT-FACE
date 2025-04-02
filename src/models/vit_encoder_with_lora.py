@@ -1,10 +1,9 @@
 import torch
 import typing as T
-from transformers import ViTConfig, ViTPreTrainedModel
+from transformers import ViTConfig, ViTPreTrainedModel, BitsAndBytesConfig
 from models.vit_encoder import VitEncoder
 from models.lora import LinearWithRSLoRA
 from common.config import ModelConfig
-from bitsandbytes import BitsAndBytesConfig
 
 
 class VitEncoderWithLoRA(ViTPreTrainedModel):
