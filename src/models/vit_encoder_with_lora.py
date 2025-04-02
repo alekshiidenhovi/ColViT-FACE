@@ -1,14 +1,21 @@
 import torch
-from transformers import ViTModel
+import typing as T
+from transformers import ViTConfig, ViTPreTrainedModel
 from models.vit_encoder import VitEncoder
 from models.lora import LinearWithRSLoRA
 from common.config import ModelConfig
+from bitsandbytes import BitsAndBytesConfig
 
 
-class VitEncoderWithLoRA(torch.nn.Module):
-    def __init__(self, vit_model: ViTModel, model_config: ModelConfig):
-        super().__init__()
-        self.encoder = VitEncoder(vit_model, model_config)
+class VitEncoderWithLoRA(ViTPreTrainedModel):
+    def __init__(
+        self,
+        config: ViTConfig,
+        model_config: ModelConfig,
+        quantization_config: T.Optional[BitsAndBytesConfig] = None,
+    ):
+        super().__init__(config)
+        self.encoder = VitEncoder(config, model_config)
         for param in self.encoder.parameters():
             param.requires_grad = False
 
@@ -51,5 +58,29 @@ class VitEncoderWithLoRA(torch.nn.Module):
             if "lora" in name:
                 param.requires_grad = True
 
-    def forward(self, input_tokens: torch.Tensor) -> torch.Tensor:
-        return self.encoder(input_tokens)
+    def forward(
+        self,
+        pixel_values: T.Optional[torch.Tensor] = None,
+        bool_masked_pos: T.Optional[torch.BoolTensor] = None,
+        head_mask: T.Optional[torch.Tensor] = None,
+        output_attentions: T.Optional[bool] = None,
+        output_hidden_states: T.Optional[bool] = None,
+        interpolate_pos_encoding: T.Optional[bool] = None,
+        return_dict: T.Optional[bool] = None,
+    ) -> torch.Tensor:
+        """Forward pass of the model.
+
+        Parameters
+        ----------
+        pixel_values : torch.Tensor, optional
+            Pixel values of the input images
+        bool_masked_pos : torch.BoolTensor, optional
+            Boolean mask for masked modeling
+        head_mask : torch.Tensor, optional
+            Mask to nullify selected heads of the attention layers
+        output_attentions : bool, optional
+            Whether to return attention weights
+        output_hidden_states : bool, optional
+            Whether to return hidden states
+        """
+        return self.encoder(pixel_values)

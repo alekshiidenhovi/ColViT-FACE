@@ -13,7 +13,7 @@ from datasets.casia_webface.dataloader import retrieve_dataloaders
 from models.vit_encoder_with_lora import VitEncoderWithLoRA
 from models.utils import compute_similarity_scores
 from training.loops import validate, save_best_model
-from transformers import ViTImageProcessorFast, ViTModel, BitsAndBytesConfig
+from transformers import ViTImageProcessorFast, BitsAndBytesConfig, AutoConfig
 
 
 @click.command()
@@ -180,13 +180,9 @@ def finetune(**kwargs):
     )
 
     logger.info("Initializing model and data modules...")
-    base_model = ViTModel.from_pretrained(
-        model_config.pretrained_vit_name, quantization_config=quantization_config
-    )
-    processor = ViTImageProcessorFast.from_pretrained(
-        model_config.pretrained_vit_name
-    )
-    model = VitEncoderWithLoRA(base_model, model_config)
+    vit_config = AutoConfig.from_pretrained(model_config.pretrained_vit_name)
+    processor = ViTImageProcessorFast.from_pretrained(model_config.pretrained_vit_name)
+    model = VitEncoderWithLoRA(vit_config, model_config, quantization_config)
     train_dataloader, val_dataloader, test_dataloader = retrieve_dataloaders(
         processor, dataset_config
     )
