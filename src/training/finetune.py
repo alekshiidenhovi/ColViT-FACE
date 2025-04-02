@@ -261,7 +261,7 @@ def finetune(**kwargs):
                     model=model,
                     accelerator=accelerator,
                     dataloader=val_dataloader,
-                    wandd_logger=wandb_logger,
+                    wandb_logger=wandb_logger,
                     limit_batches=finetuning_config.val_check_interval,
                     is_test=False,
                 )
