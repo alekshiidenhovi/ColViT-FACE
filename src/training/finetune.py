@@ -287,7 +287,7 @@ def finetune(**kwargs):
                 train_progress_bar.set_postfix(
                     {
                         "train_loss": f"{loss.item():.4f}",
-                        "val_loss": f"{val_metrics['val_loss']:.4f}",
+                        "val_loss": f"{val_metrics.val_loss:.4f}",
                     }
                 )
 
