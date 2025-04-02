@@ -86,11 +86,28 @@ class ModelConfig(BaseModel):
     token_embedding_dim: int = Field(
         default=128, ge=1, description="Final dimension of the token embeddings"
     )
+
+
+class LoraParamConfig(BaseModel):
+    """Configuration for LoRA parameters.
+
+    Defines parameters for Low-Rank Adaptation (LoRA) including rank, scaling factor,
+    target modules to adapt, and bias settings.
+    """
+
     lora_rank: int = Field(
         default=16, description="Rank of the LoRA decomposition matrix", ge=2
     )
     lora_alpha: int = Field(
         default=4, description="Scaling factor for the LoRA decomposition matrix", ge=1
+    )
+    lora_target_modules: T.List[str] = Field(
+        default=["query", "key", "value", "dense"],
+        description="Modules to apply LoRA to",
+    )
+    lora_bias: str = Field(
+        default="none",
+        description="Bias type for LoRA",
     )
 
 
@@ -175,7 +192,9 @@ class OptimizerConfig(BaseModel):
     )
 
 
-class TrainingConfig(DatasetConfig, ModelConfig, FinetuningConfig, OptimizerConfig):
+class TrainingConfig(
+    DatasetConfig, ModelConfig, FinetuningConfig, OptimizerConfig, LoraParamConfig
+):
     """Complete training configuration combining dataset, model and fine-tuning settings.
 
     Inherits from DatasetConfig, ModelConfig, FinetuningConfig and OptimizerConfig to provide a comprehensive configuration for the entire training pipeline.
@@ -223,5 +242,15 @@ class TrainingConfig(DatasetConfig, ModelConfig, FinetuningConfig, OptimizerConf
                 k: v
                 for k, v in self.model_dump().items()
                 if k in OptimizerConfig.model_fields
+            }
+        )
+
+    def get_lora_param_config(self) -> LoraParamConfig:
+        """Get LoRA configuration."""
+        return LoraParamConfig(
+            **{
+                k: v
+                for k, v in self.model_dump().items()
+                if k in LoraParamConfig.model_fields
             }
         )

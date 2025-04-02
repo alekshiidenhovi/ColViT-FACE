@@ -14,6 +14,7 @@ from common.metrics import recall_at_k
 from datasets.casia_webface.dataloader import retrieve_dataloaders
 from models.vit_encoder import VitEncoder, ExtendedViTConfig
 from models.utils import compute_similarity_scores
+from peft import LoraConfig, get_peft_model
 from training.loops import validate, save_best_model
 from transformers import (
     ViTImageProcessorFast,
@@ -179,11 +180,19 @@ def finetune(**kwargs):
     dataset_config = training_config.get_dataset_config()
     finetuning_config = training_config.get_finetuning_config()
     optimizer_config = training_config.get_optimizer_config()
+    training_lora_config = training_config.get_lora_param_config()
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
         bnb_4bit_use_double_quant=True,
         bnb_4bit_compute_dtype=torch.bfloat16,
+    )
+    lora_config = LoraConfig(
+        r=training_lora_config.lora_rank,
+        lora_alpha=training_lora_config.lora_alpha,
+        target_modules=training_lora_config.lora_target_modules,
+        bias=training_lora_config.lora_bias,
+        use_rslora=True,
     )
 
     logger.info("Initializing model and data modules...")
@@ -197,6 +206,7 @@ def finetune(**kwargs):
         config=extended_vit_config,
         quantization_config=quantization_config,
     )
+    model = get_peft_model(model, lora_config)
     print(model)
     train_dataloader, val_dataloader, test_dataloader = retrieve_dataloaders(
         processor, dataset_config
