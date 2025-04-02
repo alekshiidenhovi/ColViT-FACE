@@ -1,7 +1,8 @@
+import torch
 from urllib.request import urlopen
 from PIL import Image, ImageFile
 from models.vit_encoder_with_lora import VitEncoderWithLoRA
-from transformers import ViTModel
+from transformers import ViTModel, AutoConfig, BitsAndBytesConfig
 from common.config import ModelConfig
 
 if __name__ == "__main__":
@@ -15,8 +16,18 @@ if __name__ == "__main__":
     model_config = ModelConfig(
         pretrained_vit_name=model_name, token_embedding_dim=new_token_dim
     )
-    base_model = ViTModel.from_pretrained(model_config.pretrained_vit_name)
-    model = VitEncoderWithLoRA(base_model, model_config)
+    quantization_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_compute_dtype=torch.bfloat16,
+    )
+    vit_config = AutoConfig.from_pretrained(model_config.pretrained_vit_name)
+    model = VitEncoderWithLoRA(
+        vit_config=vit_config,
+        model_config=model_config,
+        quantization_config=quantization_config,
+    )
 
     trainable_params = []
     total_params = 0
