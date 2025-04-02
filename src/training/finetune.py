@@ -186,7 +186,7 @@ def finetune(**kwargs):
 
     logger.info("Initializing model and data modules...")
     vit_config: ViTConfig = AutoConfig.from_pretrained(model_config.pretrained_vit_name)
-    extended_vit_config = ExtendedViTConfig(model_config=model_config, **vit_config)
+    extended_vit_config = ExtendedViTConfig(**vit_config.to_dict(), model_config=model_config)
     processor = ViTImageProcessorFast.from_pretrained(model_config.pretrained_vit_name)
     model = VitEncoder.from_pretrained(
         model_config.pretrained_vit_name,
