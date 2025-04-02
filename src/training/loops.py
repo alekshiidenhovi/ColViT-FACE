@@ -68,7 +68,7 @@ def save_best_model(
     val_metrics: ValidationMetrics,
     best_val_loss: float,
 ) -> None:
-    if enable_checkpointing and val_metrics.val_loss > best_val_loss:
+    if enable_checkpointing and val_metrics.val_loss < best_val_loss:
         best_val_loss = val_metrics.val_loss
         checkpoint_path = os.path.join(
             model_checkpoint_path, f"best_model_epoch{epoch}.pt"

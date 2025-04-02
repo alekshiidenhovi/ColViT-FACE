@@ -1,6 +1,7 @@
 import click
 import time
 import torch
+import math
 from tqdm import tqdm
 from accelerate import Accelerator
 from common.config import TrainingConfig
@@ -227,7 +228,7 @@ def finetune(**kwargs):
     )
 
     global_step = 0
-    best_val_loss = 0.0
+    best_val_loss = math.inf
     model.train()
 
     logger.info("Starting model finetuning...")
