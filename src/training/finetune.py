@@ -181,10 +181,10 @@ def finetune(**kwargs):
 
     logger.info("Initializing model and data modules...")
     base_model = ViTModel.from_pretrained(
-        dataset_config.pretrained_vit_name, quantization_config=quantization_config
+        model_config.pretrained_vit_name, quantization_config=quantization_config
     )
     processor = ViTImageProcessorFast.from_pretrained(
-        dataset_config.pretrained_vit_name
+        model_config.pretrained_vit_name
     )
     model = VitEncoderWithLoRA(base_model, model_config)
     train_dataloader, val_dataloader, test_dataloader = retrieve_dataloaders(
