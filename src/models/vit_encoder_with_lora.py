@@ -12,22 +12,36 @@ class VitEncoderWithLoRA(torch.nn.Module):
         for param in self.encoder.parameters():
             param.requires_grad = False
 
-        for block in self.encoder.model.blocks:
-            block.attn.qkv = LinearWithRSLoRA(
-                block.attn.qkv,
-                model_config.lora_rank,
-                model_config.lora_alpha,
+        for block in self.encoder.base_model.encoder.layer:
+            block.attention.attention.query = LinearWithRSLoRA(
+                block.attention.attention.query,
+                rank=model_config.lora_rank,
+                alpha=model_config.lora_alpha,
             )
-            block.attn.proj = LinearWithRSLoRA(
-                block.attn.proj,
-                model_config.lora_rank,
-                model_config.lora_alpha,
+            block.attention.attention.key = LinearWithRSLoRA(
+                block.attention.attention.key,
+                rank=model_config.lora_rank,
+                alpha=model_config.lora_alpha,
             )
-            block.mlp.fc1 = LinearWithRSLoRA(
-                block.mlp.fc1, model_config.lora_rank, model_config.lora_alpha
+            block.attention.attention.value = LinearWithRSLoRA(
+                block.attention.attention.value,
+                rank=model_config.lora_rank,
+                alpha=model_config.lora_alpha,
             )
-            block.mlp.fc2 = LinearWithRSLoRA(
-                block.mlp.fc2, model_config.lora_rank, model_config.lora_alpha
+            block.attention.output.dense = LinearWithRSLoRA(
+                block.attention.output.dense,
+                rank=model_config.lora_rank,
+                alpha=model_config.lora_alpha,
+            )
+            block.intermediate.dense = LinearWithRSLoRA(
+                block.intermediate.dense,
+                rank=model_config.lora_rank,
+                alpha=model_config.lora_alpha,
+            )
+            block.output.dense = LinearWithRSLoRA(
+                block.output.dense,
+                rank=model_config.lora_rank,
+                alpha=model_config.lora_alpha,
             )
 
         for param in self.encoder.dim_reduction.parameters():

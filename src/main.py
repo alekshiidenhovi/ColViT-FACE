@@ -1,6 +1,6 @@
 from urllib.request import urlopen
 from PIL import Image, ImageFile
-from models.vit_encoder import VitEncoder
+from models.vit_encoder_with_lora import VitEncoderWithLoRA
 from transformers import ViTModel
 from common.config import ModelConfig
 
@@ -16,7 +16,7 @@ if __name__ == "__main__":
         pretrained_vit_name=model_name, token_embedding_dim=new_token_dim
     )
     base_model = ViTModel.from_pretrained(model_config.pretrained_vit_name)
-    model = VitEncoder(base_model, model_config)
+    model = VitEncoderWithLoRA(base_model, model_config)
 
     trainable_params = []
     total_params = 0
