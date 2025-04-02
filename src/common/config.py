@@ -18,12 +18,12 @@ class DatasetConfig(BaseModel):
         description="Path to the dataset directory",
     )
     train_batch_size: int = Field(
-        default=64,
+        default=8,
         ge=1,
         description="Batch size for training",
     )
     val_batch_size: int = Field(
-        default=2,
+        default=8,
         ge=1,
         description="Batch size for validation",
     )
@@ -38,7 +38,7 @@ class DatasetConfig(BaseModel):
         ge=1,
     )
     img_size: int = Field(
-        default=384,
+        default=224,
         ge=32,
         description="Size of the input images",
     )
@@ -47,7 +47,7 @@ class DatasetConfig(BaseModel):
         description="Train, validation, and test split proportions",
     )
     train_num_negative_samples: int = Field(
-        default=1,
+        default=63,
         ge=1,
         description="Number of negative samples to return per anchor image during training",
     )
@@ -109,12 +109,12 @@ class FinetuningConfig(BaseModel):
         default=True, description="Enables checkpointing of the latest training epoch"
     )
     val_check_interval: int = Field(
-        default=100,
+        default=200,
         ge=1,
         description="The interval of training batched to run validation",
     )
     limit_val_batches: int = Field(
-        default=50, description="Number of validation batches to run", ge=1
+        default=20, description="Number of validation batches to run", ge=1
     )
     precision: PrecisionType = Field(
         default=PrecisionType.BF16,
@@ -142,7 +142,7 @@ class FinetuningConfig(BaseModel):
         description="Number of batches to accumulate gradients before updating the model",
     )
     gradient_checkpointing: bool = Field(
-        default=True,
+        default=False,
         description="Enables gradient checkpointing for memory efficient training",
     )
 
