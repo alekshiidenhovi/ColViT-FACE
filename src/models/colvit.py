@@ -4,17 +4,18 @@ import lightning as L
 from models.vit_encoder import VitEncoder
 from models.utils import compute_similarity_scores
 from models.lora import LinearWithRSLoRA
-from common.config import ModelConfig
+from common.config import ModelConfig, OptimizerConfig
 from common.metrics import recall_at_k
+from common.optimizer import get_adam8bit_optimizer
 
 
 class ColViT(L.LightningModule):
-    def __init__(self, model_config: ModelConfig):
+    def __init__(self, model_config: ModelConfig, optimizer_config: OptimizerConfig):
         super().__init__()
         self.encoder = VitEncoder(
             model_config.token_embedding_dim, model_config.pretrained_vit_name
         )
-        self.model_config = model_config
+        self.optimizer_config = optimizer_config
 
         for param in self.encoder.parameters():
             param.requires_grad = False
@@ -22,19 +23,19 @@ class ColViT(L.LightningModule):
         for block in self.encoder.model.blocks:
             block.attn.qkv = LinearWithRSLoRA(
                 block.attn.qkv,
-                self.model_config.lora_rank,
-                self.model_config.lora_alpha,
+                model_config.lora_rank,
+                model_config.lora_alpha,
             )
             block.attn.proj = LinearWithRSLoRA(
                 block.attn.proj,
-                self.model_config.lora_rank,
-                self.model_config.lora_alpha,
+                model_config.lora_rank,
+                model_config.lora_alpha,
             )
             block.mlp.fc1 = LinearWithRSLoRA(
-                block.mlp.fc1, self.model_config.lora_rank, self.model_config.lora_alpha
+                block.mlp.fc1, model_config.lora_rank, model_config.lora_alpha
             )
             block.mlp.fc2 = LinearWithRSLoRA(
-                block.mlp.fc2, self.model_config.lora_rank, self.model_config.lora_alpha
+                block.mlp.fc2, model_config.lora_rank, model_config.lora_alpha
             )
 
         for param in self.encoder.dim_reduction.parameters():
@@ -85,7 +86,5 @@ class ColViT(L.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(
-            self.parameters(), lr=self.model_config.learning_rate
-        )
+        optimizer = get_adam8bit_optimizer(self.encoder, self.optimizer_config)
         return optimizer

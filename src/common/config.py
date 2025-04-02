@@ -92,9 +92,6 @@ class ModelConfig(BaseModel):
     token_embedding_dim: int = Field(
         default=128, ge=1, description="Final dimension of the token embeddings"
     )
-    learning_rate: float = Field(
-        default=1e-5, ge=0, description="Learning rate of the model"
-    )
     lora_rank: int = Field(
         default=16, description="Rank of the LoRA decomposition matrix", ge=2
     )
@@ -149,12 +146,38 @@ class FinetuningConfig(BaseModel):
     )
 
 
-class TrainingConfig(DatasetConfig, ModelConfig, FinetuningConfig):
+class OptimizerConfig(BaseModel):
+    """Configuration for the optimizer.
+
+    Contains parameters for the optimizer including weight decay, beta1 and beta2 parameters for the Adam optimizer.
+    """
+
+    weight_decay: float = Field(
+        default=0.01,
+        ge=0,
+        description="Weight decay for the optimizer",
+    )
+    adam_beta1: float = Field(
+        default=0.9,
+        ge=0.0,
+        le=1.0,
+        description="Beta1 parameter for the Adam optimizer, used for the first moment estimate",
+    )
+    adam_beta2: float = Field(
+        default=0.999,
+        ge=0.0,
+        le=1.0,
+        description="Beta2 parameter for the Adam optimizer, used for the second moment estimate",
+    )
+    learning_rate: float = Field(
+        default=1e-5, ge=0, description="Learning rate of the model"
+    )
+
+
+class TrainingConfig(DatasetConfig, ModelConfig, FinetuningConfig, OptimizerConfig):
     """Complete training configuration combining dataset, model and fine-tuning settings.
 
-    Inherits from DatasetConfig, ModelConfig and FinetuningConfig to provide a comprehensive
-    configuration for the entire training pipeline, including an additional seed parameter
-    for reproducibility.
+    Inherits from DatasetConfig, ModelConfig, FinetuningConfig and OptimizerConfig to provide a comprehensive configuration for the entire training pipeline.
     """
 
     seed: int = Field(
@@ -189,5 +212,15 @@ class TrainingConfig(DatasetConfig, ModelConfig, FinetuningConfig):
                 k: v
                 for k, v in self.model_dump().items()
                 if k in FinetuningConfig.model_fields
+            }
+        )
+
+    def get_optimizer_config(self) -> OptimizerConfig:
+        """Get optimizer configuration."""
+        return OptimizerConfig(
+            **{
+                k: v
+                for k, v in self.model_dump().items()
+                if k in OptimizerConfig.model_fields
             }
         )

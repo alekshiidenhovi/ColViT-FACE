@@ -133,6 +133,24 @@ from lightning.pytorch import Trainer, seed_everything
 @click.option(
     "--seed", default=None, type=int, help="Seed for training reproducibility"
 )
+@click.option(
+    "--weight-decay",
+    default=None,
+    type=float,
+    help="Weight decay for the optimizer",
+)
+@click.option(
+    "--adam-beta1",
+    default=None,
+    type=float,
+    help="Beta1 parameter for the Adam optimizer, used for the first moment estimate",
+)
+@click.option(
+    "--adam-beta2",
+    default=None,
+    type=float,
+    help="Beta2 parameter for the Adam optimizer, used for the second moment estimate",
+)
 def finetune(**kwargs):
     print("Starting finetuning process...")
     start_time = time.time()
@@ -148,11 +166,11 @@ def finetune(**kwargs):
     model_config = training_config.get_model_config()
     dataset_config = training_config.get_dataset_config()
     finetuning_config = training_config.get_finetuning_config()
-
+    optimizer_config = training_config.get_optimizer_config()
     seed_everything(training_config.seed)
 
     logger.info("Initializing model and data modules...")
-    model = ColViT(model_config)
+    model = ColViT(model_config, optimizer_config)
     datamodule = CASIAFaceDataModule(dataset_config)
     gpu_info = get_gpu_info_from_nvidia_smi()
 
