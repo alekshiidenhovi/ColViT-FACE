@@ -60,7 +60,7 @@ def retrieve_dataloaders(
     val_dataloader = DataLoader(
         dataset=val_dataset,
         batch_size=dataset_config.val_batch_size,
-        shuffle=True,
+        shuffle=False,
         num_workers=dataset_config.num_workers,
         pin_memory=True,
     )
@@ -68,7 +68,7 @@ def retrieve_dataloaders(
     test_dataloader = DataLoader(
         dataset=test_dataset,
         batch_size=dataset_config.test_batch_size,
-        shuffle=True,
+        shuffle=False,
         num_workers=dataset_config.num_workers,
         pin_memory=True,
     )
