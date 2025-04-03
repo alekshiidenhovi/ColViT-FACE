@@ -281,6 +281,7 @@ def finetune(**kwargs):
     for epoch in range(finetuning_config.max_epochs):
         logger.info(f"Starting epoch {epoch + 1} of {finetuning_config.max_epochs}")
         total_train_loss = 0
+        intermediate_train_loss = 0
 
         train_progress_bar = tqdm(
             train_dataloader,
@@ -297,6 +298,7 @@ def finetune(**kwargs):
                     )
                     loss = torch.nn.functional.cross_entropy(scores, targets)
                     total_train_loss += loss.item()
+                    intermediate_train_loss += loss.item()
                     accelerator.backward(loss)
                     optimizer.step()
                     optimizer.zero_grad()
@@ -305,15 +307,14 @@ def finetune(**kwargs):
             train_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
 
             if global_step % finetuning_config.val_check_interval == 0:
-                wandb_run.log({"train_loss": loss.item(), "epoch": epoch})
+                wandb_run.log({"train_loss": intermediate_train_loss, "epoch": epoch})
+                intermediate_train_loss = 0
                 recall_values = [1, 3, 10]
                 for recall_value in recall_values:
                     recall = recall_at_k(scores, recall_value)
                     wandb_run.log(
                         {f"train_recall_at_{recall_value}": recall, "epoch": epoch}
                     )
-
-            if global_step % finetuning_config.val_check_interval == 0:
                 train_progress_bar.set_postfix({"status": "Running validation..."})
                 val_metrics = validate(
                     model=model,
@@ -334,7 +335,7 @@ def finetune(**kwargs):
                 )
                 train_progress_bar.set_postfix(
                     {
-                        "train_loss": f"{loss.item():.4f}",
+                        "train_loss": f"{intermediate_train_loss:.4f}",
                         "val_loss": f"{val_metrics.val_loss:.4f}",
                     }
                 )
