@@ -174,6 +174,7 @@ def finetune(**kwargs):
     print("Starting finetuning process...")
     start_time = time.time()
     wandb_run = init_wandb_run()
+    wandb_run.log_code(".")
 
     logger.info("Initializing training configs...")
     valid_fields = set(TrainingConfig.model_fields.keys())
