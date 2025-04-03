@@ -2,6 +2,7 @@ import click
 import time
 import torch
 import math
+import wandb
 from tqdm import tqdm
 from accelerate import Accelerator
 from common.config import TrainingConfig
@@ -9,7 +10,7 @@ from common.nvidia import get_gpu_info_from_nvidia_smi
 from common.logger import logger
 from common.optimizer import get_adam8bit_optimizer
 from common.wandb_logger import init_wandb_run
-from common.parameters import count_parameters
+from common.parameters import collect_parameter_info
 from common.metrics import recall_at_k
 from datasets.casia_webface.dataloader import retrieve_dataloaders
 from models.vit_encoder import VitEncoder, ExtendedViTConfig
@@ -170,6 +171,12 @@ from transformers import (
     type=float,
     help="Beta2 parameter for the Adam optimizer, used for the second moment estimate",
 )
+@click.option(
+    "--finetuning-mode",
+    default=None,
+    type=str,
+    help="Finetuning mode used for training",
+)
 def finetune(**kwargs):
     print("Starting finetuning process...")
     start_time = time.time()
@@ -212,8 +219,35 @@ def finetune(**kwargs):
         config=extended_vit_config,
         quantization_config=quantization_config,
     )
-    model = get_peft_model(model, lora_config)
-    print(model)
+    
+    if finetuning_config.finetuning_mode == "full":
+        logger.info("Using regular finetuning mode - all parameters will be trained")
+        for param in model.parameters():
+            param.requires_grad = True
+    elif finetuning_config.finetuning_mode == "final":
+        logger.info("Using final layer finetuning mode - only the final layer will be trained")
+        for param in model.parameters():
+            param.requires_grad = False
+        for param in model.dim_reduction.parameters():
+            param.requires_grad = True
+    elif finetuning_config.finetuning_mode == "final+lora":
+        logger.info("Using final + LoRA finetuning mode - final layer will be trained normally, while the original layers will be trained with LoRA")
+        model = get_peft_model(model, lora_config)
+        for param in model.dim_reduction.parameters():
+            param.requires_grad = True
+    else:
+        raise ValueError(f"Invalid finetuning mode: {finetuning_config.finetuning_mode}")
+    
+    param_info. collect_parameter_info(model)
+    param_table = wandb.Table(dataframe=param_info.param_counts_by_layer)
+    wandb_run.log({
+        "model/total_params": param_info.total_params,
+        "model/trainable_params": param_info.trainable_params,
+        "model/trainable_percent": param_info.trainable_percent,
+        "model/trainable_layers": param_info.trainable_layers,
+    })
+    wandb_run.log({"model/parameter_details": param_table})
+    
     train_dataloader, val_dataloader, test_dataloader = retrieve_dataloaders(
         processor, dataset_config
     )

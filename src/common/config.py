@@ -5,7 +5,7 @@ from accelerate.utils.dataclasses import PrecisionType
 
 BASE_MODEL = T.Literal["google/vit-base-patch16-224"]
 ACCELERATOR = T.Literal["gpu", "cpu", "tpu"]
-
+FINETUNING_MODE = T.Literal["full", "final", "final+lora"]
 
 class DatasetConfig(BaseModel):
     """Configuration for dataset loading and preprocessing.
@@ -161,6 +161,10 @@ class FinetuningConfig(BaseModel):
     gradient_checkpointing: bool = Field(
         default=False,
         description="Enables gradient checkpointing for memory efficient training",
+    )
+    finetuning_mode: FINETUNING_MODE = Field(
+        default="final+lora",
+        description="Mode of finetuning to use, 'full' for full finetuning, 'final' for final layer finetuning, 'final+lora' final layer regular finetuning + original layer finetuning with LoRA",
     )
 
 
