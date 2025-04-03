@@ -10,6 +10,9 @@ class ParameterInfo(BaseModel):
     trainable_percent: float = Field(description="Percentage of trainable parameters")
     trainable_layers: list[str] = Field(description="List of layer names with trainable parameters")
     param_counts_by_layer: pd.DataFrame = Field(description="DataFrame with parameter counts by layer")
+    
+    class Config:
+        arbitrary_types_allowed = True
 
 
 def collect_parameter_info(model: PreTrainedModel) -> T.Dict[str, T.Any]:
