@@ -233,12 +233,12 @@ def finetune(**kwargs):
     elif finetuning_config.finetuning_mode == "final+lora":
         logger.info("Using final + LoRA finetuning mode - final layer will be trained normally, while the original layers will be trained with LoRA")
         model = get_peft_model(model, lora_config)
-        for param in model.dim_reduction.parameters():
+        for param in model.base_model.model.dim_reduction.parameters():
             param.requires_grad = True
     else:
         raise ValueError(f"Invalid finetuning mode: {finetuning_config.finetuning_mode}")
     
-    
+    logger.info(model)
     
     train_dataloader, val_dataloader, test_dataloader = retrieve_dataloaders(
         processor, dataset_config
