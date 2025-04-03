@@ -1,6 +1,8 @@
 import typing as T
 import pandas as pd
 from transformers import PreTrainedModel
+from common.logger import logger
+from peft import PeftModel
 from pydantic import BaseModel, Field
 
 
@@ -15,30 +17,26 @@ class ParameterInfo(BaseModel):
         arbitrary_types_allowed = True
 
 
-def collect_parameter_info(model: PreTrainedModel) -> ParameterInfo:
+def collect_parameter_info(model: T.Union[PreTrainedModel, "PeftModel"]) -> ParameterInfo:
     """Collects information about the model non-trainable and trainable parameters.
 
     Parameters
     ----------
-    model : torch.nn.Module
-        PyTorch model to analyze
+    model : Union[PreTrainedModel, PeftModel]
+        PyTorch model to analyze (can be a regular model or a PEFT-wrapped model)
 
     Returns
     -------
-    dict
-        Dictionary containing model parameter statistics:
-        - total_params: Total number of parameters
-        - trainable_params: Number of trainable parameters
-        - trainable_percent: Percentage of trainable parameters
-        - param_size_mb: Approximate model size in MB
-        - trainable_layers: List of layer names with trainable parameters
-        - param_counts_by_layer: DataFrame with parameter counts by layer
+    ParameterInfo
+        Object containing model parameter statistics with detailed hierarchy of trainable layers
     """
+    
     total_param_count = 0
     trainable_param_count = 0
-    trainable_layers = set()
+    trainable_layers = []
     layer_stats = []
-
+    trainable_param_names = set()
+    
     for name, param in model.named_parameters():
         param_count = param.numel()
         total_param_count += param_count
@@ -46,8 +44,7 @@ def collect_parameter_info(model: PreTrainedModel) -> ParameterInfo:
         
         if is_trainable:
             trainable_param_count += param_count
-            top_level_name = name.split('.')[0]
-            trainable_layers.add(top_level_name)
+            trainable_param_names.add(name)
             
         layer_stats.append({
             'name': name,
@@ -57,13 +54,23 @@ def collect_parameter_info(model: PreTrainedModel) -> ParameterInfo:
             'dtype': str(param.dtype).split('.')[-1]
         })
     
+    for name in sorted(trainable_param_names):
+        is_low_level = True
+        for other_name in trainable_param_names:
+            if other_name != name and other_name.startswith(name + '.'):
+                is_low_level = False
+                break
+        if is_low_level:
+            trainable_layers.append(name)
+    
     trainable_percent = (trainable_param_count / total_param_count * 100) if total_param_count > 0 else 0
     param_counts_df = pd.DataFrame(layer_stats)
+    logger.info(f"trainable layers: {trainable_layers}")
     
     return ParameterInfo(
         total_params=total_param_count,
         trainable_params=trainable_param_count,
         trainable_percent=trainable_percent,
-        trainable_layers=list(trainable_layers),
+        trainable_layers=trainable_layers,
         param_counts_by_layer=param_counts_df
     )
