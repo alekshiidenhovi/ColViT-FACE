@@ -1,5 +1,6 @@
 .venv
 .env
+.checkpoints
 __pycache__
 data
 private_notebooks
