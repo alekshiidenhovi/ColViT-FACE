@@ -93,6 +93,7 @@ numpy==2.2.4
     #   bitsandbytes
     #   faiss-cpu
     #   peft
+    #   torchvision
     #   transformers
 nvidia-cublas-cu12==12.4.5.8
     # via
@@ -144,6 +145,8 @@ peft==0.15.1
     # via -r requirements.in
 pexpect==4.9.0
     # via ipython
+pillow==11.1.0
+    # via torchvision
 platformdirs==4.3.7
     # via
     #   jupyter-core
@@ -230,7 +233,10 @@ torch==2.6.0
     #   accelerate
     #   bitsandbytes
     #   peft
+    #   torchvision
     #   transformers
+torchvision==0.21.0
+    # via -r requirements.in
 tornado==6.4.2
     # via
     #   ipykernel
