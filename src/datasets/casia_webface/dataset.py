@@ -70,19 +70,27 @@ class CASIAFaceDataset(Dataset):
         """
         query_image_path = self.image_paths[idx]
         identity = self.image_identities[idx]
-        other_identities = [id for id in self.image_identities if id != identity]
+        other_identities = [
+            id for id in self.identity_to_image_paths.keys() if id != identity
+        ]
 
         nof_other_identity_images = 0
-        for identity in other_identities:
-            nof_other_identity_images += len(self.identity_to_image_paths[identity])
+        for other_identity in other_identities:
+            nof_other_identity_images += len(
+                self.identity_to_image_paths[other_identity]
+            )
 
-        positive_image_path = random.choice(
-            [
-                img_path
-                for img_path in self.identity_to_image_paths[identity]
-                if img_path != query_image_path
-            ]
-        )
+        same_identity_paths = [
+            img_path
+            for img_path in self.identity_to_image_paths[identity]
+            if img_path != query_image_path
+        ]
+        if len(same_identity_paths) == 0:
+            raise ValueError(
+                f"No positive images found for identity {identity}. "
+                f"Please check the dataset."
+            )
+        positive_image_path = random.choice(same_identity_paths)
 
         negative_image_paths = []
         used_paths = {query_image_path, positive_image_path}
@@ -99,5 +107,5 @@ class CASIAFaceDataset(Dataset):
         image_paths = [query_image_path, positive_image_path, *negative_image_paths]
 
         images = [Image.open(p).convert("RGB") for p in image_paths]
-        images = self.processor(images=images, return_tensors="pt")
-        return (images, image_paths)
+        processed_images = self.processor(images=images, return_tensors="pt")
+        return (processed_images.pixel_values, image_paths)
