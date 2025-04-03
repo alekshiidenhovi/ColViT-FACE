@@ -64,7 +64,7 @@ def validate(
         recall = recall_at_k(all_scores, recall_value)
         metrics[f"{prefix}_recall_at_{recall_value}"] = recall
 
-    wandb_run.log_metrics(metrics)
+    wandb_run.log(metrics)
     model.train()
 
     return ValidationMetrics(**metrics)
