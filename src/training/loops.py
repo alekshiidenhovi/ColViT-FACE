@@ -78,11 +78,14 @@ def save_best_model(
     enable_checkpointing: bool,
     val_metrics: ValidationMetrics,
     best_val_loss: float,
-) -> None:
+) -> float:
+    """Save the best model and return the new best validation loss."""
     if enable_checkpointing and val_metrics.val_loss < best_val_loss:
-        best_val_loss = val_metrics.val_loss
+        new_best_val_loss = val_metrics.val_loss
         checkpoint_path = os.path.join(
             model_checkpoint_path, f"best_model_epoch{epoch}.pt"
         )
         accelerator.save_state(checkpoint_path)
-        logger.info(f"Saved new best model with val_recall_at_1: {best_val_loss:.4f}")
+        logger.info(f"Saved new best model with val loss: {best_val_loss:.4f}")
+        return new_best_val_loss
+    return best_val_loss

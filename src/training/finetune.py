@@ -291,7 +291,7 @@ def finetune(**kwargs):
                     limit_batches=finetuning_config.limit_val_batches,
                     is_test=False,
                 )
-                save_best_model(
+                best_val_loss = save_best_model(
                     accelerator=accelerator,
                     epoch=epoch,
                     logger=logger,
@@ -321,6 +321,15 @@ def finetune(**kwargs):
             wandb_run=wandb_run,
             limit_batches=finetuning_config.limit_val_batches,
             is_test=False,
+        )
+        best_val_loss = save_best_model(
+            accelerator=accelerator,
+            epoch=epoch,
+            logger=logger,
+            model_checkpoint_path=finetuning_config.model_checkpoint_path,
+            enable_checkpointing=finetuning_config.enable_checkpointing,
+            val_metrics=val_metrics,
+            best_val_loss=best_val_loss,
         )
 
     logger.info("Running final evaluation on test set...")
