@@ -270,13 +270,14 @@ def finetune(**kwargs):
                     optimizer.step()
                     optimizer.zero_grad()
 
-            wandb_run.log({"train_loss": loss.item(), "epoch": epoch})
-            recall_values = [1, 3, 10]
-            for recall_value in recall_values:
-                recall = recall_at_k(scores, recall_value)
-                wandb_run.log(
-                    {f"train_recall_at_{recall_value}": recall, "epoch": epoch}
-                )
+            if global_step % finetuning_config.val_check_interval == 0:
+                wandb_run.log({"train_loss": loss.item(), "epoch": epoch})
+                recall_values = [1, 3, 10]
+                for recall_value in recall_values:
+                    recall = recall_at_k(scores, recall_value)
+                    wandb_run.log(
+                        {f"train_recall_at_{recall_value}": recall, "epoch": epoch}
+                    )
 
             global_step += 1
             train_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
