@@ -1,7 +1,6 @@
 import wandb
 import os
 from dotenv import load_dotenv
-from lightning.pytorch.loggers import WandbLogger
 
 
 def init_wandb_logger():
@@ -13,8 +12,7 @@ def init_wandb_logger():
 
     Returns
     -------
-    WandbLogger
-        The configured PyTorch Lightning W&B logger instance
+    wandb.init: A WandbLogger instance for experiment tracking
 
     Notes
     -----
@@ -31,5 +29,4 @@ def init_wandb_logger():
     wandb.login(key=WANDB_API_KEY)
 
     experiment = wandb.init(project=WANDB_PROJECT, entity=WANDB_ENTITY)
-    logger = WandbLogger(project=WANDB_PROJECT, experiment=experiment)
-    return logger
+    return experiment
