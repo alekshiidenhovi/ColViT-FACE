@@ -26,6 +26,10 @@ click==8.1.8
     #   wandb
 comm==0.2.2
     # via ipykernel
+contourpy==1.3.1
+    # via matplotlib
+cycler==0.12.1
+    # via matplotlib
 debugpy==1.8.13
     # via ipykernel
 decorator==5.2.1
@@ -45,6 +49,8 @@ filelock==3.18.0
     #   huggingface-hub
     #   torch
     #   transformers
+fonttools==4.56.0
+    # via matplotlib
 fsspec==2025.3.0
     # via
     #   huggingface-hub
@@ -84,16 +90,18 @@ jupyter-core==5.7.2
     #   ipykernel
     #   jupyter-client
     #   nbformat
+kiwisolver==1.4.8
+    # via matplotlib
 markupsafe==3.0.2
     # via jinja2
+matplotlib==3.10.1
+    # via -r requirements.in
 matplotlib-inline==0.1.7
     # via
     #   ipykernel
     #   ipython
 mpmath==1.3.0
     # via sympy
-narwhals==1.32.0
-    # via plotly
 nbformat==5.10.4
     # via -r requirements-dev.in
 nest-asyncio==1.6.0
@@ -104,7 +112,9 @@ numpy==2.2.4
     # via
     #   accelerate
     #   bitsandbytes
+    #   contourpy
     #   faiss-cpu
+    #   matplotlib
     #   peft
     #   torchvision
     #   transformers
@@ -148,8 +158,8 @@ packaging==24.2
     #   faiss-cpu
     #   huggingface-hub
     #   ipykernel
+    #   matplotlib
     #   peft
-    #   plotly
     #   pytest
     #   transformers
 parso==0.8.4
@@ -159,13 +169,13 @@ peft==0.15.1
 pexpect==4.9.0
     # via ipython
 pillow==11.1.0
-    # via torchvision
+    # via
+    #   matplotlib
+    #   torchvision
 platformdirs==4.3.7
     # via
     #   jupyter-core
     #   wandb
-plotly==6.0.0
-    # via -r requirements.in
 pluggy==1.5.0
     # via pytest
 prompt-toolkit==3.0.50
@@ -192,10 +202,14 @@ pygments==2.19.1
     # via
     #   ipython
     #   ipython-pygments-lexers
+pyparsing==3.2.3
+    # via matplotlib
 pytest==8.3.5
     # via -r requirements-dev.in
 python-dateutil==2.9.0.post0
-    # via jupyter-client
+    # via
+    #   jupyter-client
+    #   matplotlib
 python-dotenv==1.1.0
     # via -r requirements.in
 pyyaml==6.0.2

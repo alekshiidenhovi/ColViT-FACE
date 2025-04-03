@@ -2,10 +2,10 @@ bitsandbytes==0.45.4
 click==8.1.8
 einops==0.8.1
 faiss-cpu==1.10.0
+matplotlib==3.10.1
 peft==0.15.1
 pydantic==2.10.6
 python-dotenv==1.1.0
 torchvision==0.21.0
 transformers[torch]==4.49.0
-plotly==6.0.0
 wandb==0.19.8
