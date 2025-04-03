@@ -238,7 +238,16 @@ def finetune(**kwargs):
     else:
         raise ValueError(f"Invalid finetuning mode: {finetuning_config.finetuning_mode}")
     
+    
+    
+    train_dataloader, val_dataloader, test_dataloader = retrieve_dataloaders(
+        processor, dataset_config
+    )
+    optimizer = get_adam8bit_optimizer(model, optimizer_config)
+    gpu_info = get_gpu_info_from_nvidia_smi()
     param_info = collect_parameter_info(model)
+
+    logger.info("Logging training configs and GPU info to W&B...")
     param_table = wandb.Table(dataframe=param_info.param_counts_by_layer)
     wandb_run.log({
         "model/total_params": param_info.total_params,
@@ -247,21 +256,8 @@ def finetune(**kwargs):
         "model/trainable_layers": param_info.trainable_layers,
     })
     wandb_run.log({"model/parameter_details": param_table})
-    
-    train_dataloader, val_dataloader, test_dataloader = retrieve_dataloaders(
-        processor, dataset_config
-    )
-    optimizer = get_adam8bit_optimizer(model, optimizer_config)
-
-    gpu_info = get_gpu_info_from_nvidia_smi()
-
-    logger.info("Logging training configs and GPU info to W&B...")
-    total_params_count, trainable_params_count = count_parameters(model.encoder)
     wandb_run.config.update(training_config.model_dump())
     wandb_run.config.update({"gpu_info": gpu_info})
-    wandb_run.config.update(
-        {"total_params": total_params_count, "trainable_params": trainable_params_count}
-    )
     wandb_run.watch(model)
 
     if finetuning_config.gradient_checkpointing:
