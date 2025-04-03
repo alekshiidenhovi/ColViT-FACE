@@ -86,6 +86,6 @@ def save_best_model(
             model_checkpoint_path, f"best_model_epoch{epoch}.pt"
         )
         accelerator.save_state(checkpoint_path)
-        logger.info(f"Saved new best model with val loss: {best_val_loss:.4f}")
+        logger.info(f"Saved new best model with val loss: {new_best_val_loss:.4f}")
         return new_best_val_loss
     return best_val_loss
