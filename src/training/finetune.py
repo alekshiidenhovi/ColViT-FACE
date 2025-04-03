@@ -108,6 +108,12 @@ from transformers import (
     help="Enables checkpointing of the latest training epoch",
 )
 @click.option(
+    "--gradient-checkpointing",
+    default=None,
+    type=bool,
+    help="Enables gradient checkpointing for memory efficient training",
+)
+@click.option(
     "--val-check-interval",
     default=None,
     type=int,
