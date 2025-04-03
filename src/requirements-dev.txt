@@ -115,6 +115,7 @@ numpy==2.2.4
     #   contourpy
     #   faiss-cpu
     #   matplotlib
+    #   pandas
     #   peft
     #   torchvision
     #   transformers
@@ -162,6 +163,8 @@ packaging==24.2
     #   peft
     #   pytest
     #   transformers
+pandas==2.2.3
+    # via -r requirements.in
 parso==0.8.4
     # via jedi
 peft==0.15.1
@@ -210,8 +213,11 @@ python-dateutil==2.9.0.post0
     # via
     #   jupyter-client
     #   matplotlib
+    #   pandas
 python-dotenv==1.1.0
     # via -r requirements.in
+pytz==2025.2
+    # via pandas
 pyyaml==6.0.2
     # via
     #   accelerate
@@ -305,6 +311,8 @@ typing-extensions==4.13.0
     #   referencing
     #   torch
     #   wandb
+tzdata==2025.2
+    # via pandas
 urllib3==2.3.0
     # via
     #   requests
