@@ -15,7 +15,7 @@ class ParameterInfo(BaseModel):
         arbitrary_types_allowed = True
 
 
-def collect_parameter_info(model: PreTrainedModel) -> T.Dict[str, T.Any]:
+def collect_parameter_info(model: PreTrainedModel) -> ParameterInfo:
     """Collects information about the model non-trainable and trainable parameters.
 
     Parameters
@@ -60,10 +60,10 @@ def collect_parameter_info(model: PreTrainedModel) -> T.Dict[str, T.Any]:
     trainable_percent = (trainable_param_count / total_param_count * 100) if total_param_count > 0 else 0
     param_counts_df = pd.DataFrame(layer_stats)
     
-    return {
-        'total_params': total_param_count,
-        'trainable_params': trainable_param_count,
-        'trainable_percent': trainable_percent,
-        'trainable_layers': list(trainable_layers),
-        'param_counts_by_layer': param_counts_df
-    }
+    return ParameterInfo(
+        total_params=total_param_count,
+        trainable_params=trainable_param_count,
+        trainable_percent=trainable_percent,
+        trainable_layers=list(trainable_layers),
+        param_counts_by_layer=param_counts_df
+    )
