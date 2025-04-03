@@ -238,7 +238,7 @@ def finetune(**kwargs):
     else:
         raise ValueError(f"Invalid finetuning mode: {finetuning_config.finetuning_mode}")
     
-    param_info. collect_parameter_info(model)
+    param_info = collect_parameter_info(model)
     param_table = wandb.Table(dataframe=param_info.param_counts_by_layer)
     wandb_run.log({
         "model/total_params": param_info.total_params,
