@@ -270,6 +270,9 @@ def finetune(**kwargs):
                     optimizer.step()
                     optimizer.zero_grad()
 
+            global_step += 1
+            train_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
+
             if global_step % finetuning_config.val_check_interval == 0:
                 wandb_run.log({"train_loss": loss.item(), "epoch": epoch})
                 recall_values = [1, 3, 10]
@@ -278,9 +281,6 @@ def finetune(**kwargs):
                     wandb_run.log(
                         {f"train_recall_at_{recall_value}": recall, "epoch": epoch}
                     )
-
-            global_step += 1
-            train_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
 
             if global_step % finetuning_config.val_check_interval == 0:
                 train_progress_bar.set_postfix({"status": "Running validation..."})
