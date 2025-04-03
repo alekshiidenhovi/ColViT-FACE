@@ -264,11 +264,11 @@ def finetune(**kwargs):
                     optimizer.step()
                     optimizer.zero_grad()
 
-            wandb_run.log_metrics({"train_loss": loss.item(), "epoch": epoch})
+            wandb_run.log({"train_loss": loss.item(), "epoch": epoch})
             recall_values = [1, 3, 10]
             for recall_value in recall_values:
                 recall = recall_at_k(scores, recall_value)
-                wandb_run.log_metrics(
+                wandb_run.log(
                     {f"train_recall_at_{recall_value}": recall, "epoch": epoch}
                 )
 
@@ -301,7 +301,7 @@ def finetune(**kwargs):
                     }
                 )
 
-        wandb_run.log_metrics(
+        wandb_run.log(
             {
                 "train_epoch_loss": total_train_loss / len(train_dataloader),
                 "epoch": epoch,
