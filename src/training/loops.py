@@ -23,7 +23,7 @@ def validate(
     model: torch.nn.Module,
     accelerator: Accelerator,
     dataloader: DataLoader,
-    wandb_logger: wandb.wandb_run.Run,
+    wandb_run: wandb.wandb_run.Run,
     limit_batches: T.Optional[int] = None,
     is_test: bool = False,
 ) -> ValidationMetrics:
@@ -64,7 +64,7 @@ def validate(
         recall = recall_at_k(all_scores, recall_value)
         metrics[f"{prefix}_recall_at_{recall_value}"] = recall
 
-    wandb_logger.log_metrics(metrics)
+    wandb_run.log_metrics(metrics)
     model.train()
 
     return ValidationMetrics(**metrics)

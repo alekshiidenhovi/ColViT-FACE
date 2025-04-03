@@ -3,23 +3,26 @@ import os
 from dotenv import load_dotenv
 
 
-def init_wandb_logger():
+def init_wandb_run():
     """
     Initialize and configure a Weights & Biases logger.
 
-    This function loads environment variables, authenticates with W&B using the API key,
-    and creates a WandbLogger instance for experiment tracking.
+    This function loads environment variables from a .env file, authenticates with W&B using the API key,
+    and initializes a new W&B run for experiment tracking. The run is configured with the project and entity
+    specified in the environment variables.
 
     Returns
     -------
-    wandb.init: A WandbLogger instance for experiment tracking
+    wandb.wandb_run.Run
+        An initialized W&B run object that can be used to log metrics, artifacts and other experiment data.
+        The run will be associated with the specified project and entity.
 
     Notes
     -----
-    Requires the following environment variables to be set:
+    Required environment variables in .env file:
     - WANDB_API_KEY: The Weights & Biases API key for authentication
-    - WANDB_PROJECT: The name of the W&B project to log to
-    - WANDB_ENTITY: The W&B username or team name
+    - WANDB_PROJECT: The name of the W&B project to log experiments to
+    - WANDB_ENTITY: The W&B username or team name that owns the project
     """
     load_dotenv()
     WANDB_API_KEY = os.getenv("WANDB_API_KEY")
@@ -28,5 +31,5 @@ def init_wandb_logger():
 
     wandb.login(key=WANDB_API_KEY)
 
-    experiment = wandb.init(project=WANDB_PROJECT, entity=WANDB_ENTITY)
-    return experiment
+    run = wandb.init(project=WANDB_PROJECT, entity=WANDB_ENTITY)
+    return run
