@@ -105,7 +105,7 @@ class LoraParamConfig(BaseModel):
         default=["query", "key", "value", "dense"],
         description="Modules to apply LoRA to",
     )
-    lora_bias: str = Field(
+    lora_bias: T.Literal['none', 'all', 'lora_only'] = Field(
         default="none",
         description="Bias type for LoRA",
     )
