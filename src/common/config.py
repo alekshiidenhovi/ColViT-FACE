@@ -2,10 +2,20 @@ from pydantic import BaseModel, Field, field_validator
 import typing as T
 import multiprocessing
 from accelerate.utils.dataclasses import PrecisionType
+from wandb_logger import init_wandb_api_client
 
 BASE_MODEL = T.Literal["google/vit-base-patch16-224"]
 ACCELERATOR = T.Literal["gpu", "cpu", "tpu"]
 FINETUNING_MODE = T.Literal["full", "final", "final+lora"]
+BENCHMARK_TYPE = T.Literal["vector_index", "full_rerank"]
+
+class BenchmarkConfig(BaseModel):
+    model_dir: str = Field(description="Path to model checkpoint directory")
+    lfw_dataset_dir: str = Field(description="Path to LFW dataset directory")
+    batch_size: int = Field(description="Batch size for embedding computation")
+    max_images_per_identity: int = Field(description="Maximum number of images per identity")
+    benchmark_type: BENCHMARK_TYPE = Field(description="Type of benchmark to run")
+
 
 class DatasetConfig(BaseModel):
     """Configuration for dataset loading and preprocessing.
@@ -258,3 +268,10 @@ class TrainingConfig(
                 if k in LoraParamConfig.model_fields
             }
         )
+        
+    def load_from_wandb(self, run_id: str):
+        """Load the configuration from a W&B run."""
+        wandb_api = init_wandb_api_client()
+        run = wandb_api.run(run_id)
+        valid_config = {k: v for k, v in run.config.items() if k in self.model_fields}
+        return self(**valid_config)
