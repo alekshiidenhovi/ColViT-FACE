@@ -1,6 +1,9 @@
 from transformers import ViTConfig, ViTModel
 from common.config import ModelConfig
+from common.logger import logger
+from safetensors.torch import load_file
 import torch
+import os
 import typing as T
 import math
 
@@ -81,3 +84,26 @@ class VitEncoder(ViTModel):
         normalized_last_hidden_state = self.layernorm(last_hidden_state)
         output_tokens = self.dim_reduction(normalized_last_hidden_state)
         return output_tokens
+    
+    def load_from_checkpoint(self, checkpoint_dir_path: str):
+        """Load the model from a checkpoint directory.
+        
+        This function loads the model from a checkpoint directory and updates the model's state dictionary.
+        
+        Parameters
+        ----------
+        checkpoint_dir_path : str
+            The path to the checkpoint directory
+        """
+        checkpoint_path = os.path.join(checkpoint_dir_path, "model.safetensors")
+        state_dict = load_file(checkpoint_path)
+
+        missing_keys, unexpected_keys = self.load_state_dict(state_dict, strict=False)        
+        if len(missing_keys):
+            raise ValueError(f"Missing keys: {missing_keys}")
+        if len(unexpected_keys):
+            raise ValueError(f"Unexpected keys: {unexpected_keys}")
+        
+        logger.info(f"Loaded model successfullyfrom checkpoint path: {checkpoint_path}")
+        
+        
