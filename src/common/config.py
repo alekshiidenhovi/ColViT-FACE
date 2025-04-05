@@ -267,10 +267,10 @@ class TrainingConfig(
                 if k in LoraParamConfig.model_fields
             }
         )
-        
-    def load_from_wandb(self, run_id: str):
+    @classmethod        
+    def load_from_wandb(cls, run_id: str):
         """Load the configuration from a W&B run."""
         wandb_api = init_wandb_api_client()
         run = wandb_api.run(run_id)
-        valid_config = {k: v for k, v in run.config.items() if k in self.model_fields}
-        return self(**valid_config)
+        valid_config = {k: v for k, v in run.config.items() if k in cls.model_fields}
+        return cls(**valid_config)
