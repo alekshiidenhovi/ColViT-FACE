@@ -3,6 +3,14 @@ import os
 from dotenv import load_dotenv
 
 
+
+def init_wandb_api_client():
+    """Initialize a W&B API client."""
+    load_dotenv()
+    WANDB_API_KEY = os.getenv("WANDB_API_KEY")
+    return wandb.Api(api_key=WANDB_API_KEY)
+
+
 def init_wandb_run():
     """
     Initialize and configure a Weights & Biases logger.
