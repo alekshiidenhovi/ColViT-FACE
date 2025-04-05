@@ -25,8 +25,10 @@ def partition_lfw_images(dir_path: str, max_images_per_identity: int):
         if os.path.isdir(os.path.join(dir_path, d))
     ]
     all_image_paths = []
+    all_image_path_to_identity = {}
     test_identities = []
     test_image_paths = []
+    test_image_path_to_identity = {}
     
     for identity in all_identities:
         identity_path = os.path.join(dir_path, identity)
@@ -36,7 +38,13 @@ def partition_lfw_images(dir_path: str, max_images_per_identity: int):
         if len(image_file_names) > 1:
             test_identities.append(identity)
             test_image_paths.extend([os.path.join(identity_path, img_file_name) for img_file_name in image_file_names])
+            for img_file_name in image_file_names:
+                image_path = os.path.join(identity_path, img_file_name)
+                test_image_path_to_identity[image_path] = identity
         all_identities.append(identity)
-        all_image_paths.extend([os.path.join(identity_path, img_file_name) for img_file_name in image_file_names])
+        for img_file_name in image_file_names:
+            image_path = os.path.join(identity_path, img_file_name)
+            all_image_paths.append(image_path)
+            all_image_path_to_identity[image_path] = identity
     
-    return all_identities, all_image_paths, test_identities, test_image_paths
+    return all_identities, all_image_paths, all_image_path_to_identity, test_identities, test_image_paths, test_image_path_to_identity
