@@ -264,7 +264,7 @@ def finetune(**kwargs):
         model.gradient_checkpointing_enable()
 
     accelerator = Accelerator(
-        mixed_precision=finetuning_config.precision.value,
+        mixed_precision=finetuning_config.precision
         gradient_accumulation_steps=finetuning_config.accumulate_grad_batches,
     )
     model, optimizer, train_dataloader, val_dataloader, test_dataloader = (

@@ -142,8 +142,8 @@ class FinetuningConfig(BaseModel):
     limit_val_batches: int = Field(
         default=20, description="Number of validation batches to run", ge=1
     )
-    precision: PrecisionType = Field(
-        default=PrecisionType.BF16,
+    precision: str = Field(
+        default=PrecisionType.BF16.value,
         description="Precision of gradients and the model used during finetuning",
     )
     model_checkpoint_path: str = Field(
