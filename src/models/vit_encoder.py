@@ -122,6 +122,6 @@ class VitEncoder(ViTModel):
             else:
                 logger.info(f"All unexpected keys are related to quantization and can be safely ignored.")
             
-            logger.info(f"Loaded model successfully from checkpoint path: {checkpoint_path}")
+        logger.info(f"Loaded model successfully from checkpoint path: {checkpoint_path}")
             
             
