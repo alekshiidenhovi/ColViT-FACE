@@ -98,30 +98,30 @@ class VitEncoder(ViTModel):
         checkpoint_path = os.path.join(checkpoint_dir_path, "model.safetensors")
         state_dict = load_file(checkpoint_path)
     
-    missing_keys, unexpected_keys = self.load_state_dict(state_dict, strict=False)
-    
-    if len(missing_keys):
-        if 'dim_reduction.weight' in missing_keys or 'dim_reduction.bias' in missing_keys:
-            logger.warning("Missing dim_reduction layer keys. This might be expected if loading a base model.")
-        else:
-            logger.warning(f"Missing keys: {missing_keys}")
-    
-    if len(unexpected_keys):
-        # Filter out quantization-related keys
-        non_quant_unexpected_keys = [
-            key 
-            for key in unexpected_keys 
-            if not any(
-                suffix in key 
-                for suffix in ['.absmax', '.quant_state', '.quant_map', '.nested_absmax', '.nested_quant_map']
-            )
-        ]
+        missing_keys, unexpected_keys = self.load_state_dict(state_dict, strict=False)
         
-        if non_quant_unexpected_keys:
-            logger.warning(f"Unexpected non-quantization keys: {non_quant_unexpected_keys}")
-        else:
-            logger.info(f"All unexpected keys are related to quantization and can be safely ignored.")
+        if len(missing_keys):
+            if 'dim_reduction.weight' in missing_keys or 'dim_reduction.bias' in missing_keys:
+                logger.warning("Missing dim_reduction layer keys. This might be expected if loading a base model.")
+            else:
+                logger.warning(f"Missing keys: {missing_keys}")
         
-        logger.info(f"Loaded model successfully from checkpoint path: {checkpoint_path}")
-        
-        
+        if len(unexpected_keys):
+            # Filter out quantization-related keys
+            non_quant_unexpected_keys = [
+                key 
+                for key in unexpected_keys 
+                if not any(
+                    suffix in key 
+                    for suffix in ['.absmax', '.quant_state', '.quant_map', '.nested_absmax', '.nested_quant_map']
+                )
+            ]
+            
+            if non_quant_unexpected_keys:
+                logger.warning(f"Unexpected non-quantization keys: {non_quant_unexpected_keys}")
+            else:
+                logger.info(f"All unexpected keys are related to quantization and can be safely ignored.")
+            
+            logger.info(f"Loaded model successfully from checkpoint path: {checkpoint_path}")
+            
+            
