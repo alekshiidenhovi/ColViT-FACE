@@ -9,7 +9,7 @@ from tqdm import tqdm
 from PIL import Image
 from typing import List, Dict, Tuple
 from torch.utils.data import DataLoader
-from transformers import ViTImageProcessorFast, ViTConfig, AutoConfig
+from transformers import ViTImageProcessorFast, ViTConfig, AutoConfig, BitsAndBytesConfig
 from benchmark.utils import estimate_flops
 from common.wandb_logger import init_wandb_run
 from common.metrics import recall_at_k
