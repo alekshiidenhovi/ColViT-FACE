@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, field_validator
 import typing as T
 import multiprocessing
 from accelerate.utils.dataclasses import PrecisionType
-from wandb_logger import init_wandb_api_client
+from common.wandb_logger import init_wandb_api_client
 
 BASE_MODEL = T.Literal["google/vit-base-patch16-224"]
 ACCELERATOR = T.Literal["gpu", "cpu", "tpu"]
