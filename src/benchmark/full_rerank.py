@@ -110,9 +110,9 @@ def full_rerank_benchmark(
                 "batch_size num_images channel height width -> (batch_size num_images) channel height width",
             )
             embeddings = model(images)
-            query_embeddings = F.normalize(query_embeddings, p=2, dim=-1)
-            query_embeddings = rearrange(
-                query_embeddings,
+            embeddings = F.normalize(embeddings, p=2, dim=-1)
+            embeddings = rearrange(
+                embeddings,
                 "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
                 batch_size=batch_size,
                 num_images=num_images,
