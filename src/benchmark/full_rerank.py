@@ -90,7 +90,7 @@ def full_rerank_benchmark(
     full_dataloader = DataLoader(full_dataset, batch_size=training_config.test_batch_size, shuffle=False, num_workers=training_config.num_workers)
     test_dataloader = DataLoader(test_dataset, batch_size=training_config.test_batch_size, shuffle=False, num_workers=training_config.num_workers)
     
-    logger.info(f"Loaded dataset with {len(dataset)} images")
+    logger.info(f"Loaded dataset with {len(full_dataset)} images")
     
     # Compute embeddings for all images
     logger.info("Computing embeddings for all images...")
