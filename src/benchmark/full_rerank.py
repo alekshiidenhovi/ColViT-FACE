@@ -101,7 +101,7 @@ def full_rerank_benchmark(
     
     # Compute embeddings for all images
     logger.info("Computing embeddings for all images...")
-    all_embeddings = torch.tensor([])
+    all_embeddings = torch.tensor([], device=accelerator.device)
     
     accelerator = Accelerator(mixed_precision=finetuning_config.precision)
     model, full_dataloader, test_dataloader = accelerator.prepare(model, full_dataloader, test_dataloader)
