@@ -71,10 +71,12 @@ def full_rerank_benchmark(
     )
     model.load_from_checkpoint(model_dir)
     model.eval()
-    
+    logger.info("Partitioning LFW images...")
     all_identities, all_image_paths, all_image_path_to_identity, test_identities, test_image_paths, test_image_path_to_identity = partition_lfw_images(
         lfw_dataset_dir, max_images_per_identity
     )
+    
+    logger.info("Loading LFW dataset...")
     full_dataset = LFWBenchmarkDataset(
         dir_path=lfw_dataset_dir,
         processor=processor,
@@ -87,6 +89,8 @@ def full_rerank_benchmark(
         image_identities=test_identities,
         image_paths=test_image_paths
     )
+    
+    logger.info("Initializing dataloaders...")
     full_dataloader = DataLoader(full_dataset, batch_size=training_config.test_batch_size, shuffle=False, num_workers=training_config.num_workers)
     test_dataloader = DataLoader(test_dataset, batch_size=training_config.test_batch_size, shuffle=False, num_workers=training_config.num_workers)
     
