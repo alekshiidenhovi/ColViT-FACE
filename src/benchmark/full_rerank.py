@@ -14,10 +14,10 @@ from benchmark.utils import estimate_flops
 from common.wandb_logger import init_wandb_run
 from common.metrics import recall_at_k
 from common.logger import logger
-from common.config import BenchmarkConfig
+from common.config import BenchmarkConfig, TrainingConfig
 from models.utils import compute_similarity_scores
 from datasets.lfw.dataset import LFWBenchmarkDataset
-from models.vit_encoder import VitEncoder
+from models.vit_encoder import VitEncoder, ExtendedViTConfig
 
 @click.command()
 @click.option("--model-dir", required=True, help="Path to model checkpoint directory")
