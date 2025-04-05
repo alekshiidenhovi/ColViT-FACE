@@ -178,7 +178,7 @@ def full_rerank_benchmark(
     
     # Log results
     results = {
-        f"recall@{k}": float(torch.mean(recalls[k]) * 100) for k in recalls.keys()
+        f"recall@{k}": float(torch.mean(torch.tensor(recalls[k])) * 100) for k in recalls.keys()
     }
     
     # Add performance metrics
