@@ -68,6 +68,7 @@ def full_rerank_benchmark(
     )
     model.load_from_checkpoint(model_dir)
     model.eval()
+    print(model)
     
     # dataset = LFWBenchmarkDataset(
     #     dir_path=lfw_dataset_dir,
