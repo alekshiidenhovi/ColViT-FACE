@@ -21,6 +21,7 @@ from datasets.lfw.dataset import LFWBenchmarkDataset
 from models.utils import compute_similarity_scores
 from models.vit_encoder import VitEncoder, ExtendedViTConfig
 from training.scoring import maxsim
+from einops import rearrange
 
 @click.command()
 @click.option("--model-dir", required=True, help="Path to model checkpoint directory")
@@ -116,9 +117,20 @@ def full_rerank_benchmark(
     max_k = max(recalls.keys())
     with torch.no_grad():
         for batch in tqdm(test_dataloader):
-            images, image_paths, identities = batch
-            query_embeddings = model(images)
+            pixel_values, image_paths, identities = batch
+            batch_size, num_images = pixel_values.shape[:2]
+            query_images = rearrange(
+                pixel_values,
+                "batch_size num_images channel height width -> (batch_size num_images) channel height width",
+            )
+            query_embeddings = model(query_images)
             query_embeddings = F.normalize(query_embeddings, p=2, dim=-1)
+            query_embeddings = rearrange(
+                query_embeddings,
+                "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
+                batch_size=batch_size,
+                num_images=num_images,
+            )
             
             while idx < query_embeddings.shape[0]:
                 query_embedding = query_embeddings[idx].unsqueeze(0)
