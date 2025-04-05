@@ -6,6 +6,7 @@ import wandb
 import numpy as np
 import psutil
 import torch.nn.functional as F
+from accelerate import Accelerator
 from tqdm import tqdm
 from collections import defaultdict
 from PIL import Image
@@ -59,6 +60,7 @@ def full_rerank_benchmark(
         bnb_4bit_compute_dtype=torch.bfloat16,
     )
     training_config = TrainingConfig.load_from_wandb(wandb_run_id)
+    finetuning_config = training_config.get_finetuning_config()
     model_config = training_config.get_model_config()
     vit_config: ViTConfig = AutoConfig.from_pretrained(model_config.pretrained_vit_name)
     extended_vit_config = ExtendedViTConfig(
@@ -71,7 +73,7 @@ def full_rerank_benchmark(
         quantization_config=quantization_config,
     )
     model.load_from_checkpoint(model_dir)
-    model.eval()
+    
     logger.info("Partitioning LFW images...")
     all_identities, all_image_paths, all_image_path_to_identity, test_identities, test_image_paths, test_image_path_to_identity = partition_lfw_images(
         lfw_dataset_dir, max_images_per_identity
@@ -101,23 +103,28 @@ def full_rerank_benchmark(
     logger.info("Computing embeddings for all images...")
     all_embeddings = torch.tensor([])
     
+    accelerator = Accelerator(mixed_precision=finetuning_config.precision)
+    model, full_dataloader, test_dataloader = accelerator.prepare(model, full_dataloader, test_dataloader)
+    
+    model.eval()
     with torch.no_grad():
         for batch in tqdm(full_dataloader):
-            pixel_values, image_paths, identities = batch
-            batch_size, num_images = pixel_values.shape[:2]
-            images = rearrange(
-                pixel_values,
-                "batch_size num_images channel height width -> (batch_size num_images) channel height width",
-            )
-            embeddings = model(images)
-            embeddings = F.normalize(embeddings, p=2, dim=-1)
-            embeddings = rearrange(
-                embeddings,
-                "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
-                batch_size=batch_size,
-                num_images=num_images,
-            )
-            all_embeddings = torch.cat([all_embeddings, embeddings], dim=0)
+            with accelerator.autocast():
+                pixel_values, image_paths, identities = batch
+                batch_size, num_images = pixel_values.shape[:2]
+                images = rearrange(
+                    pixel_values,
+                    "batch_size num_images channel height width -> (batch_size num_images) channel height width",
+                )
+                embeddings = model(images)
+                embeddings = F.normalize(embeddings, p=2, dim=-1)
+                embeddings = rearrange(
+                    embeddings,
+                    "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
+                    batch_size=batch_size,
+                    num_images=num_images,
+                )
+                all_embeddings = torch.cat([all_embeddings, embeddings], dim=0)
             
 
     similarity_start_time = time.time()
@@ -128,38 +135,39 @@ def full_rerank_benchmark(
     max_k = max(recalls.keys())
     with torch.no_grad():
         for batch in tqdm(test_dataloader):
-            pixel_values, image_paths, identities = batch
-            batch_size, num_images = pixel_values.shape[:2]
-            query_images = rearrange(
-                pixel_values,
-                "batch_size num_images channel height width -> (batch_size num_images) channel height width",
-            )
-            query_embeddings = model(query_images)
-            query_embeddings = F.normalize(query_embeddings, p=2, dim=-1)
-            query_embeddings = rearrange(
-                query_embeddings,
-                "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
-                batch_size=batch_size,
-                num_images=num_images,
-            )
-            
-            while idx < query_embeddings.shape[0]:
-                query_embedding = query_embeddings[idx].unsqueeze(0)
-                query_path = image_paths[idx]
-                query_identity = identities[idx]
-                similarity_scores = maxsim(query_embedding, all_embeddings) # (batch_size, num_images)
+            with accelerator.autocast():
+                pixel_values, image_paths, identities = batch
+                batch_size, num_images = pixel_values.shape[:2]
+                query_images = rearrange(
+                    pixel_values,
+                    "batch_size num_images channel height width -> (batch_size num_images) channel height width",
+                )
+                query_embeddings = model(query_images)
+                query_embeddings = F.normalize(query_embeddings, p=2, dim=-1)
+                query_embeddings = rearrange(
+                    query_embeddings,
+                    "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
+                    batch_size=batch_size,
+                    num_images=num_images,
+                )
                 
-                top_k_indices = np.argsort(-similarity_scores)[:max_k]
-                top_k_paths = [all_image_paths[i] for i in top_k_indices]
-                top_k_paths = [path for path in top_k_paths if path != query_path]
-                top_k_identities = [all_image_path_to_identity[path] for path in top_k_paths]
-                
-                for k in recalls.keys():
-                    hit = any(identity == query_identity for identity in top_k_identities[:k])
-                    recalls[k].append(1 if hit else 0)
-                
-                idx += 1
-                
+                while idx < query_embeddings.shape[0]:
+                    query_embedding = query_embeddings[idx].unsqueeze(0)
+                    query_path = image_paths[idx]
+                    query_identity = identities[idx]
+                    similarity_scores = maxsim(query_embedding, all_embeddings) # (batch_size, num_images)
+                    
+                    top_k_indices = np.argsort(-similarity_scores)[:max_k]
+                    top_k_paths = [all_image_paths[i] for i in top_k_indices]
+                    top_k_paths = [path for path in top_k_paths if path != query_path]
+                    top_k_identities = [all_image_path_to_identity[path] for path in top_k_paths]
+                    
+                    for k in recalls.keys():
+                        hit = any(identity == query_identity for identity in top_k_identities[:k])
+                        recalls[k].append(1 if hit else 0)
+                    
+                    idx += 1
+                    
     similarity_duration = time.time() - similarity_start_time
     cpu_sim_end = psutil.cpu_times()
     cpu_sim_user_time = cpu_sim_end.user - cpu_sim_start.user
