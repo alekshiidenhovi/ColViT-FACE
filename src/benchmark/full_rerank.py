@@ -3,7 +3,6 @@ import time
 import click
 import torch
 import wandb
-import numpy as np
 import psutil
 import torch.nn.functional as F
 from accelerate import Accelerator
@@ -158,7 +157,7 @@ def full_rerank_benchmark(
                     query_identity = identities[idx]
                     similarity_scores = maxsim(query_embedding, all_embeddings) # (batch_size, num_images)
                     
-                    top_k_indices = np.argsort(-similarity_scores)[:max_k]
+                    top_k_indices = torch.argsort(-similarity_scores)[:max_k]
                     top_k_paths = [all_image_paths[i] for i in top_k_indices]
                     top_k_paths = [path for path in top_k_paths if path != query_path]
                     top_k_identities = [all_image_path_to_identity[path] for path in top_k_paths]
@@ -179,7 +178,7 @@ def full_rerank_benchmark(
     
     # Log results
     results = {
-        f"recall@{k}": np.mean(recalls[k]) * 100 for k in recalls.keys()
+        f"recall@{k}": float(torch.mean(recalls[k]) * 100) for k in recalls.keys()
     }
     
     # Add performance metrics
