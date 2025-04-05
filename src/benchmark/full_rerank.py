@@ -150,7 +150,8 @@ def full_rerank_benchmark(
                     batch_size=batch_size,
                     num_images=num_images,
                 )
-                
+                    
+                idx = 0                
                 while idx < query_embeddings.shape[0]:
                     query_embedding = query_embeddings[idx].unsqueeze(0)
                     query_path = image_paths[idx]
