@@ -12,7 +12,6 @@ BENCHMARK_TYPE = T.Literal["vector_index", "full_rerank"]
 class BenchmarkConfig(BaseModel):
     model_dir: str = Field(description="Path to model checkpoint directory")
     lfw_dataset_dir: str = Field(description="Path to LFW dataset directory")
-    batch_size: int = Field(description="Batch size for embedding computation")
     max_images_per_identity: int = Field(description="Maximum number of images per identity")
     benchmark_type: BENCHMARK_TYPE = Field(description="Type of benchmark to run")
 
