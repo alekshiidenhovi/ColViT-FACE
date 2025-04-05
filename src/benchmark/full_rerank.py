@@ -103,9 +103,20 @@ def full_rerank_benchmark(
     
     with torch.no_grad():
         for batch in tqdm(full_dataloader):
-            images, _, _ = batch
+            pixel_values, image_paths, identities = batch
+            batch_size, num_images = pixel_values.shape[:2]
+            images = rearrange(
+                pixel_values,
+                "batch_size num_images channel height width -> (batch_size num_images) channel height width",
+            )
             embeddings = model(images)
-            embeddings = F.normalize(embeddings, p=2, dim=-1)
+            query_embeddings = F.normalize(query_embeddings, p=2, dim=-1)
+            query_embeddings = rearrange(
+                query_embeddings,
+                "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
+                batch_size=batch_size,
+                num_images=num_images,
+            )
             all_embeddings = torch.cat([all_embeddings, embeddings], dim=0)
             
 
