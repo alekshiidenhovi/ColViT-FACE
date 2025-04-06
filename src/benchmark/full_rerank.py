@@ -136,13 +136,16 @@ def full_rerank_benchmark(
             with accelerator.autocast():
                 pixel_values, image_paths, identities = batch
                 batch_size, num_images = pixel_values.shape[:2]
+                logger.info(f"Pixel values shape: {pixel_values.shape}")
                 logger.info(f"Batch size: {batch_size}")
                 logger.info(f"Num images: {num_images}")
                 query_images = rearrange(
                     pixel_values,
                     "batch_size num_images channel height width -> (batch_size num_images) channel height width",
                 )
+                logger.info(f"Query images shape: {query_images.shape}")
                 query_embeddings = model(query_images)
+                logger.info(f"Query embeddings shape: {query_embeddings.shape}")
                 query_embeddings = F.normalize(query_embeddings, p=2, dim=-1)
                 query_embeddings = rearrange(
                     query_embeddings,
@@ -150,15 +153,18 @@ def full_rerank_benchmark(
                     batch_size=batch_size,
                     num_images=num_images,
                 )
+                logger.info(f"Final query embeddings shape: {query_embeddings.shape}")
                                    
                 for idx in range(batch_size):
                     query_embedding = query_embeddings[idx].unsqueeze(0)
+                    logger.info(f"Query embedding shape: {query_embedding.shape}")
                     query_path = image_paths[idx]
                     query_identity = identities[idx]
                     similarity_scores = maxsim(query_embedding, all_embeddings) # (batch_size, num_images)
-                    print(f"Similarity scores before squeezing dimension: {similarity_scores.shape}")
+                    
+                    logger.info(f"Similarity scores before squeezing dimension: {similarity_scores.shape}")
                     similarity_scores = similarity_scores.squeeze(0)
-                    print(f"Similarity scores after squeezing dimension: {similarity_scores.shape}")
+                    logger.info(f"Similarity scores after squeezing dimension: {similarity_scores.shape}")
                     
                     top_k_indices = torch.argsort(similarity_scores, descending=True)[:max_k]
                     top_k_paths = [all_image_paths[i] for i in top_k_indices]
