@@ -156,11 +156,11 @@ def full_rerank_benchmark(
                     query_path = image_paths[idx]
                     query_identity = identities[idx]
                     similarity_scores = maxsim(query_embedding, all_embeddings) # (batch_size, num_images)
+                    print(f"Similarity scores before squeezing dimension: {similarity_scores.shape}")
                     similarity_scores = similarity_scores.squeeze(0)
+                    print(f"Similarity scores after squeezing dimension: {similarity_scores.shape}")
                     
                     top_k_indices = torch.argsort(similarity_scores, descending=True)[:max_k]
-                    top_k_indices = top_k_indices.cpu().tolist()
-
                     top_k_paths = [all_image_paths[i] for i in top_k_indices]
                     top_k_paths = [path for path in top_k_paths if path != query_path]
                     top_k_identities = [all_image_path_to_identity[path] for path in top_k_paths]
