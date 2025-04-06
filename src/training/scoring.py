@@ -14,8 +14,6 @@ def maxsim(query_image: Tensor, gallery_images: Tensor) -> Tensor:
         gallery_images,
         "batch_size query_len reduced_dim, batch_size num_images gallery_len reduced_dim -> batch_size num_images query_len gallery_len",
     )
-    logger.info(f"Similarities shape: {similarities.shape}")
     max_similarities, _ = torch.max(similarities, dim=-1)
-    logger.info(f"Max similarities shape: {max_similarities.shape}")
     scores: Tensor = max_similarities.sum(dim=-1)
     return scores
