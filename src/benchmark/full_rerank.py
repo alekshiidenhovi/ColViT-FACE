@@ -127,92 +127,92 @@ def full_rerank_benchmark(
                 
     logger.info(f"All embeddings shape: {all_embeddings.shape}")
 
-    similarity_start_time = time.time()
-    cpu_sim_start = psutil.cpu_times()
+    # similarity_start_time = time.time()
+    # cpu_sim_start = psutil.cpu_times()
     
-    recalls = {1: [], 10: [], 100: [], 1000: []}
-    max_k = max(recalls.keys())
-    with torch.no_grad():
-        for batch in tqdm(test_dataloader):
-            with accelerator.autocast():
-                pixel_values, image_paths, identities = batch
-                batch_size, num_images = pixel_values.shape[:2]
-                logger.info(f"Pixel values shape: {pixel_values.shape}")
-                logger.info(f"Batch size: {batch_size}")
-                logger.info(f"Num images: {num_images}")
-                query_images = rearrange(
-                    pixel_values,
-                    "batch_size num_images channel height width -> (batch_size num_images) channel height width",
-                )
-                logger.info(f"Query images shape: {query_images.shape}")
-                query_embeddings = model(query_images)
-                logger.info(f"Query embeddings shape: {query_embeddings.shape}")
-                query_embeddings = F.normalize(query_embeddings, p=2, dim=-1)
-                query_embeddings = rearrange(
-                    query_embeddings,
-                    "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
-                    batch_size=batch_size,
-                    num_images=num_images,
-                )
-                logger.info(f"Final query embeddings shape: {query_embeddings.shape}")
+    # recalls = {1: [], 10: [], 100: [], 1000: []}
+    # max_k = max(recalls.keys())
+    # with torch.no_grad():
+    #     for batch in tqdm(test_dataloader):
+    #         with accelerator.autocast():
+    #             pixel_values, image_paths, identities = batch
+    #             batch_size, num_images = pixel_values.shape[:2]
+    #             logger.info(f"Pixel values shape: {pixel_values.shape}")
+    #             logger.info(f"Batch size: {batch_size}")
+    #             logger.info(f"Num images: {num_images}")
+    #             query_images = rearrange(
+    #                 pixel_values,
+    #                 "batch_size num_images channel height width -> (batch_size num_images) channel height width",
+    #             )
+    #             logger.info(f"Query images shape: {query_images.shape}")
+    #             query_embeddings = model(query_images)
+    #             logger.info(f"Query embeddings shape: {query_embeddings.shape}")
+    #             query_embeddings = F.normalize(query_embeddings, p=2, dim=-1)
+    #             query_embeddings = rearrange(
+    #                 query_embeddings,
+    #                 "(batch_size num_images) seq_len reduced_dim -> batch_size num_images seq_len reduced_dim",
+    #                 batch_size=batch_size,
+    #                 num_images=num_images,
+    #             )
+    #             logger.info(f"Final query embeddings shape: {query_embeddings.shape}")
                                    
-                for idx in range(batch_size):
-                    query_embedding = query_embeddings[idx].unsqueeze(0)
-                    logger.info(f"Query embedding shape: {query_embedding.shape}")
-                    query_path = image_paths[idx]
-                    query_identity = identities[idx]
-                    similarity_scores = maxsim(query_embedding, all_embeddings) # (batch_size, num_images)
+    #             for idx in range(batch_size):
+    #                 query_embedding = query_embeddings[idx].unsqueeze(0)
+    #                 logger.info(f"Query embedding shape: {query_embedding.shape}")
+    #                 query_path = image_paths[idx]
+    #                 query_identity = identities[idx]
+    #                 similarity_scores = maxsim(query_embedding, all_embeddings) # (batch_size, num_images)
                     
-                    logger.info(f"Similarity scores before squeezing dimension: {similarity_scores.shape}")
-                    similarity_scores = similarity_scores.squeeze(0)
-                    logger.info(f"Similarity scores after squeezing dimension: {similarity_scores.shape}")
+    #                 logger.info(f"Similarity scores before squeezing dimension: {similarity_scores.shape}")
+    #                 similarity_scores = similarity_scores.squeeze(0)
+    #                 logger.info(f"Similarity scores after squeezing dimension: {similarity_scores.shape}")
                     
-                    top_k_indices = torch.argsort(similarity_scores, descending=True)[:max_k]
-                    top_k_paths = [all_image_paths[i] for i in top_k_indices]
-                    top_k_paths = [path for path in top_k_paths if path != query_path]
-                    top_k_identities = [all_image_path_to_identity[path] for path in top_k_paths]
-                    logger.info(f"Target identity: {query_identity}")
-                    logger.info(f"Top k identities: {top_k_identities}")
-                    for k in recalls.keys():
-                        hit = any(identity == query_identity for identity in top_k_identities[:k])
-                        recalls[k].append(1 if hit else 0)
+    #                 top_k_indices = torch.argsort(similarity_scores, descending=True)[:max_k]
+    #                 top_k_paths = [all_image_paths[i] for i in top_k_indices]
+    #                 top_k_paths = [path for path in top_k_paths if path != query_path]
+    #                 top_k_identities = [all_image_path_to_identity[path] for path in top_k_paths]
+    #                 logger.info(f"Target identity: {query_identity}")
+    #                 logger.info(f"Top k identities: {top_k_identities}")
+    #                 for k in recalls.keys():
+    #                     hit = any(identity == query_identity for identity in top_k_identities[:k])
+    #                     recalls[k].append(1 if hit else 0)
                     
-    similarity_duration = time.time() - similarity_start_time
-    cpu_sim_end = psutil.cpu_times()
-    cpu_sim_user_time = cpu_sim_end.user - cpu_sim_start.user
-    cpu_sim_system_time = cpu_sim_end.system - cpu_sim_start.system
+    # similarity_duration = time.time() - similarity_start_time
+    # cpu_sim_end = psutil.cpu_times()
+    # cpu_sim_user_time = cpu_sim_end.user - cpu_sim_start.user
+    # cpu_sim_system_time = cpu_sim_end.system - cpu_sim_start.system
     
-    logger.info(f"Similarity computation completed in {similarity_duration:.2f} seconds")
-    logger.info(f"CPU time for similarity - User: {cpu_sim_user_time:.2f}s, System: {cpu_sim_system_time:.2f}s")
+    # logger.info(f"Similarity computation completed in {similarity_duration:.2f} seconds")
+    # logger.info(f"CPU time for similarity - User: {cpu_sim_user_time:.2f}s, System: {cpu_sim_system_time:.2f}s")
     
-    # Log results
-    results = {
-        f"recall@{k}": float(torch.mean(torch.tensor(recalls[k], dtype=torch.float)) * 100) for k in recalls.keys()
-    }
+    # # Log results
+    # results = {
+    #     f"recall@{k}": float(torch.mean(torch.tensor(recalls[k], dtype=torch.float)) * 100) for k in recalls.keys()
+    # }
     
-    # Add performance metrics
-    performance_metrics = {
-        "similarity_computation_duration": similarity_duration,
-        "similarity_cpu_user_time": cpu_sim_user_time,
-        "similarity_cpu_system_time": cpu_sim_system_time
-    }
+    # # Add performance metrics
+    # performance_metrics = {
+    #     "similarity_computation_duration": similarity_duration,
+    #     "similarity_cpu_user_time": cpu_sim_user_time,
+    #     "similarity_cpu_system_time": cpu_sim_system_time
+    # }
     
-    results.update(performance_metrics)
-    wandb_run.log(results)
+    # results.update(performance_metrics)
+    # wandb_run.log(results)
     
-    for k, value in results.items():
-        if isinstance(value, float):
-            logger.info(f"{k}: {value:.2f}")
-        else:
-            logger.info(f"{k}: {value}")
+    # for k, value in results.items():
+    #     if isinstance(value, float):
+    #         logger.info(f"{k}: {value:.2f}")
+    #     else:
+    #         logger.info(f"{k}: {value}")
     
     
-    benchmark_duration = time.time() - start_time
-    logger.info(f"Benchmark completed in {benchmark_duration:.2f} seconds")
-    wandb_run.summary.update({
-        "benchmark_duration": benchmark_duration,
-        **performance_metrics
-    })
+    # benchmark_duration = time.time() - start_time
+    # logger.info(f"Benchmark completed in {benchmark_duration:.2f} seconds")
+    # wandb_run.summary.update({
+    #     "benchmark_duration": benchmark_duration,
+    #     **performance_metrics
+    # })
 
 
 if __name__ == "__main__":
