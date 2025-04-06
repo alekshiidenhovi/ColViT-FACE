@@ -128,7 +128,6 @@ def full_rerank_benchmark(
 
     similarity_start_time = time.time()
     cpu_sim_start = psutil.cpu_times()
-    total_queries = 0
     
     recalls = {1: [], 10: [], 100: [], 1000: []}
     max_k = max(recalls.keys())
@@ -149,15 +148,17 @@ def full_rerank_benchmark(
                     batch_size=batch_size,
                     num_images=num_images,
                 )
-                    
-                idx = 0                
-                while idx < query_embeddings.shape[0]:
+                                   
+                for idx in range(batch_size):
                     query_embedding = query_embeddings[idx].unsqueeze(0)
                     query_path = image_paths[idx]
                     query_identity = identities[idx]
                     similarity_scores = maxsim(query_embedding, all_embeddings) # (batch_size, num_images)
+                    similarity_scores = similarity_scores.squeeze(0)
                     
-                    top_k_indices = torch.argsort(-similarity_scores)[:max_k]
+                    top_k_indices = torch.argsort(similarity_scores, descending=True)[:max_k]
+                    top_k_indices = top_k_indices.cpu().tolist()
+
                     top_k_paths = [all_image_paths[i] for i in top_k_indices]
                     top_k_paths = [path for path in top_k_paths if path != query_path]
                     top_k_identities = [all_image_path_to_identity[path] for path in top_k_paths]
@@ -165,8 +166,6 @@ def full_rerank_benchmark(
                     for k in recalls.keys():
                         hit = any(identity == query_identity for identity in top_k_identities[:k])
                         recalls[k].append(1 if hit else 0)
-                    
-                    idx += 1
                     
     similarity_duration = time.time() - similarity_start_time
     cpu_sim_end = psutil.cpu_times()
@@ -185,8 +184,7 @@ def full_rerank_benchmark(
     performance_metrics = {
         "similarity_computation_duration": similarity_duration,
         "similarity_cpu_user_time": cpu_sim_user_time,
-        "similarity_cpu_system_time": cpu_sim_system_time,
-        "total_queries": total_queries
+        "similarity_cpu_system_time": cpu_sim_system_time
     }
     
     results.update(performance_metrics)
