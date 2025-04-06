@@ -124,7 +124,8 @@ def full_rerank_benchmark(
                     num_images=num_images,
                 )
                 all_embeddings = torch.cat([all_embeddings, embeddings], dim=0)
-            
+                
+    logger.info(f"All embeddings shape: {all_embeddings.shape}")
 
     similarity_start_time = time.time()
     cpu_sim_start = psutil.cpu_times()

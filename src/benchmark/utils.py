@@ -39,13 +39,12 @@ def partition_lfw_images(dir_path: str, max_images_per_identity: int):
             if img.lower().endswith((".jpg", ".jpeg", ".png"))
         ]
         image_file_names = image_file_names[:max_images_per_identity]
-        if len(image_file_names) > 1:
-            for img_file_name in image_file_names:
+        for img_file_name in image_file_names:
+            if len(image_file_names) > 1:
                 test_identities.append(identity)
                 image_path = os.path.join(identity_path, img_file_name)
                 test_image_paths.append(image_path)
                 test_image_path_to_identity[image_path] = identity
-        for img_file_name in image_file_names:
             all_identities.append(identity)
             image_path = os.path.join(identity_path, img_file_name)
             all_image_paths.append(image_path)
