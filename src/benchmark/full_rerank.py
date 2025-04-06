@@ -136,6 +136,8 @@ def full_rerank_benchmark(
             with accelerator.autocast():
                 pixel_values, image_paths, identities = batch
                 batch_size, num_images = pixel_values.shape[:2]
+                logger.info(f"Batch size: {batch_size}")
+                logger.info(f"Num images: {num_images}")
                 query_images = rearrange(
                     pixel_values,
                     "batch_size num_images channel height width -> (batch_size num_images) channel height width",
@@ -162,7 +164,8 @@ def full_rerank_benchmark(
                     top_k_paths = [all_image_paths[i] for i in top_k_indices]
                     top_k_paths = [path for path in top_k_paths if path != query_path]
                     top_k_identities = [all_image_path_to_identity[path] for path in top_k_paths]
-                    
+                    logger.info(f"Target identity: {query_identity}")
+                    logger.info(f"Top k identities: {top_k_identities}")
                     for k in recalls.keys():
                         hit = any(identity == query_identity for identity in top_k_identities[:k])
                         recalls[k].append(1 if hit else 0)
