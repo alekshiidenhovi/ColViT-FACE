@@ -9,4 +9,4 @@ Run the initialization bash script with the following command: `source scripts/a
 - Install packages to the virtual environment (`scripts/install-deps.sh`)
 
 ## W&B Logging
-If you want to log your experiments with Weights & Biases, copy the `.env.template` file as `.env` file and fill in your W&B project name to `WANDB_PROJECT` variable. Pytorch Lightning `WandbLogger` will you this value to initialize the logger.
+If you want to log your experiments with Weights & Biases, copy the `.env.template` file as `.env` file and fill in your W&B project name to `WANDB_PROJECT` variable.
